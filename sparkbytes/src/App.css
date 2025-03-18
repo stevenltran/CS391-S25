@@ -25,7 +25,7 @@ p {
 }
 
 .App-button {
-  background-color: #066920;
+  background-color: #21f559;
   color: #282c34;
   padding: 12px 24px;
   font-size: 1rem;
@@ -37,5 +37,5 @@ p {
 }
 
 .App-button:hover {
-  background-color: #21f13d;
+  background-color: #fbfffb;
 }
