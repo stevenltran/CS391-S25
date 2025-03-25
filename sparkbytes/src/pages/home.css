@@ -42,3 +42,32 @@ p {
 .home-button:hover {
   background-color: #fbfffb;
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #178848;
+  border-bottom: 1px solid #ddd;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 15px;
+}
+
+.navbar-brand {
+  text-decoration: none;
+  color: #f4f6f8;
+  font-weight: bold;
+}
+
+.navbar-button {
+  text-decoration: none;
+  color: #f4f6f8;
+  font-weight: bold;
+}
+
+.navbar-button:hover {
+  text-decoration: underline;
+}
