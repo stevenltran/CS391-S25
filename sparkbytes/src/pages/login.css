@@ -52,3 +52,13 @@
     font-size: 14px;
     margin-bottom: 10px;
   }
+
+  .register-button {
+    text-decoration: none;
+    color: #eff1f7;
+    background-color: #256a30; 
+    padding: 8px 16px; 
+    border-radius: 5px; 
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease; 
+  }

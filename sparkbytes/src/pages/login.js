@@ -37,7 +37,7 @@ function Login() {
         <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
         <button type="submit">Login</button>
       </form>
-      <p>Don't have an account? <a href="/register">Register here</a></p>
+      <p>Don't have an account? <a href="/register" className="register-button">Register here</a></p>
     </div>
   );
 }
