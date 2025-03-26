@@ -1,34 +1,59 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./profile.css";
 
 function Profile() {
-  // placeholder user data replace with actual backend data later
-  const user = {
+  const [user] = useState({
     name: "Sarah",
     email: "sarah@bu.edu",
-    role: "Student Or Organizer", 
-    profilePicture: "https://i.pravatar.cc/150?img=3",
+    role: "Student",
     claimedEvents: 3,
     createdEvents: 0,
-  };
+    profilePicture: "https://i.pravatar.cc/150?img=3",
+  });
 
   return (
-    <div className="profile-container">
+    <div className="profile-wrapper">
       <div className="profile-card">
-        <img src={user.profilePicture} alt="Profile" className="profile-picture" />
-        <h2>{user.name}</h2>
-        <p>{user.email}</p>
-        <p className="user-role">{user.role}</p>
+        <img
+          src={user.profilePicture}
+          alt="Profile"
+          className="profile-picture"
+        />
+        <h1>My Profile</h1>
 
-        {user.role === "Student" && (
-          <p>Events Claimed: {user.claimedEvents}</p>
-        )}
+        <div className="profile-info">
+          <div>
+            <label>Name</label>
+            <p>{user.name}</p>
+          </div>
+          <div>
+            <label>Email</label>
+            <p>{user.email}</p>
+          </div>
+          <div>
+            <label>Role</label>
+            <p>{user.role}</p>
+          </div>
+          {user.role === "Student" && (
+            <div>
+              <label>Events Claimed</label>
+              <p>{user.claimedEvents}</p>
+            </div>
+          )}
+          {user.role === "Organizer" && (
+            <div>
+              <label>Events Created</label>
+              <p>{user.createdEvents}</p>
+            </div>
+          )}
+        </div>
 
-        {user.role === "Organizer" && (
-          <p>Events Created: {user.createdEvents}</p>
-        )}
-
-        <button className="edit-button">Edit Profile</button>
+        <button className="edit-btn">Edit Profile</button>
       </div>
+
+     
+      <Link to="/" className="home-btn">← Back to Home</Link>
     </div>
   );
 }

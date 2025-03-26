@@ -1,64 +1,81 @@
-.login-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #282c34; 
-    text-align: center;
-    color: white;
-  }
-  
- 
-  .login-box {
-    background: rgba(255, 255, 255, 0.1); 
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 320px;
-  }
-  
-  
-  input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-  
-  
-  .login-button {
-    width: 100%;
-    padding: 12px;
-    background-color: #21f559;
-    color: #282c34;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-  }
-  
-  .login-button:hover {
-    background-color: #fbfffb;
-  }
-  
-  
-  .error-message {
-    color: red;
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
+/* Global Styles (if not already applied globally) */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fffaf0;  /* Warm cream */
+  color: #2e2e2e;            /* Rich dark gray */
+}
 
-  .register-button {
-    text-decoration: none;
-    color: #eff1f7;
-    background-color: #256a30; 
-    padding: 8px 16px; 
-    border-radius: 5px; 
-    font-weight: bold;
-    transition: background-color 0.3s ease, color 0.3s ease; 
-  }
+/* ==== LOGIN PAGE CONTAINER ==== */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fffaf0;  /* Same warm cream as home page */
+  text-align: center;
+}
+
+/* ==== LOGIN BOX (Card Style) ==== */
+.login-box {
+  background: #ffffff;  /* White card */
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+
+/* ==== INPUT FIELDS ==== */
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* ==== LOGIN BUTTON (Matching Home CTA) ==== */
+.login-button {
+  width: 100%;
+  padding: 14px 30px;
+  background-color: #8d6e63;  /* Chocolate brown */
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(141, 110, 99, 0.25);
+}
+
+.login-button:hover {
+  background-color: #a1887f;
+  transform: scale(1.05);
+}
+
+/* ==== ERROR MESSAGE ==== */
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* ==== REGISTER BUTTON ==== */
+.register-button {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 16px;
+  background-color: #81c784;  /* Fresh green */
+  color: white;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.register-button:hover {
+  background-color: #689f38;
+}

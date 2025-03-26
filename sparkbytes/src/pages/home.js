@@ -21,7 +21,7 @@ function Home() {
       <Navbar />
       <div className="home-container">
         <h1>Welcome to SparkBytes!</h1>
-        <p>Claim your food here.</p>
+        <p>Food finds for hungry students.</p>
         <Link to="/login" className="home-button">Get Started</Link>
       </div>
     </div>
