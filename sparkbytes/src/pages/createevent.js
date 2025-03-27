@@ -18,12 +18,12 @@ function CreateEvent() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Save event to localStorage for now (temporary storage)
+    // save event to localStorage for now (temporary storage)
     const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
     const updatedEvents = [...storedEvents, formData];
     localStorage.setItem("events", JSON.stringify(updatedEvents));
 
-    // Redirect to event listing page
+    // redirect to event listing page
     navigate("/events");
   };
 

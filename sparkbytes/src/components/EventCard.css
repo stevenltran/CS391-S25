@@ -5,15 +5,6 @@
   padding: 40px 20px;
 }
 
-.event-title {
-  width: 100%;
-  max-width: 1200px;
-  font-size: 2rem;
-  margin-bottom: 24px;
-  text-align: left;
-  color: #222;
-}
-
 .event-list-container {
   display: flex;
   flex-direction: column;

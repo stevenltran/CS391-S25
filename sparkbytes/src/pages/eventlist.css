@@ -4,13 +4,13 @@
     gap: 20px;
     padding: 20px;
     justify-content: center;
-  }
+}
 
-  .event-title {
+.event-title {
     width: 100%;
     max-width: 1200px;
     font-size: 2rem;
     margin-bottom: 24px;
     text-align: left;
     color: white;
-  }
+}
