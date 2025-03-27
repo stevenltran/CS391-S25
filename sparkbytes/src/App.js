@@ -6,6 +6,7 @@ import "./App.css";
 
 import EventList from "./pages/eventlist";
 import Navbar from "./components/Navbar";
+import CreateEvent from "./pages/createevent";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} /> 
         <Route path="/events" element={<EventList />} />
+        <Route path="/createevent" element={<CreateEvent />} />
       </Routes>
     </Router>
   );

@@ -11,6 +11,7 @@ function Navbar() {
         <Link to="/login" className="navbar-button">Login</Link>
         <Link to="/profile" className="navbar-button">Profile</Link>
         <Link to="/events" className="navbar-button">Events</Link>
+        <Link to="/createevent" className="navbar-button">Create Event</Link>
       </div>
     </nav>
   );
