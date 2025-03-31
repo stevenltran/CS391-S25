@@ -81,11 +81,8 @@ p {
 }
 
 .home-button:hover {
-<<<<<<< HEAD
+
   background-color: #a1887f;
   transform: scale(1.05);
 }
-=======
-  background-color: #fbfffb;
-}
->>>>>>> sprint-3-work
+
