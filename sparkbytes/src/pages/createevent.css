@@ -32,7 +32,7 @@
   }
   
   .create-event-form button {
-    background-color: #007bff;
+    background-color: #ff5e3a;
     color: white;
     font-size: 1.2rem;
     border: none;
@@ -45,4 +45,29 @@
   .create-event-form button:hover {
     background-color: #0056b3;
   }
+
+  .create-event-form select {
+    background-color: #fff;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg fill='%23333' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 16px;
+  }
+
+  select {
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+  }
   
+  
+  .create-event-form input,
+  .create-event-form textarea,
+  .create-event-form select,
+  .create-event-form button[type="submit"] {
+    width: 100%;
+    box-sizing: border-box;
+  }

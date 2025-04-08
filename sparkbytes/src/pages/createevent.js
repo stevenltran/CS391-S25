@@ -9,10 +9,13 @@ function CreateEvent() {
     description: "",
     location: "",
     date: "",
+    foodType: "", 
+    limit: "",
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    
   };
 
   const handleSubmit = (e) => {
@@ -20,8 +23,9 @@ function CreateEvent() {
 
     // save event to localStorage for now (temporary storage)
     const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
-    const updatedEvents = [...storedEvents, formData];
+    const updatedEvents = [...storedEvents, { ...formData, rsvps: [] }];
     localStorage.setItem("events", JSON.stringify(updatedEvents));
+    
 
     // redirect to event listing page
     navigate("/events");
@@ -57,6 +61,30 @@ function CreateEvent() {
           onChange={handleChange} 
           required 
         />
+        <select
+          name="foodType"
+          value={formData.foodType}
+          onChange={handleChange}
+          required
+        >
+        <option value="">-- Select Food Type --</option>
+        <option value="Vegan">Vegan</option>
+        <option value="Halal">Halal</option>
+        <option value="Kosher">Kosher</option>
+        <option value="Vegetarian">Vegetarian</option>
+        <option value="Gluten-Free">Gluten-Free</option>
+        <option value="Regular">Regular</option>
+        </select>
+        
+        <input
+          type="number"
+          name="limit"
+          placeholder="RSVP Limit"
+          onChange={handleChange}
+          required
+          min={1}
+        />
+
         <button type="submit">Create Event</button>
       </form>
     </div>
