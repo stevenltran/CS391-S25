@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./createevent.css";
 
+// firebase
+import { db } from "../firebase"; 
+import { collection, addDoc } from "firebase/firestore";
+
 function CreateEvent() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -18,18 +22,28 @@ function CreateEvent() {
     
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // save event to localStorage for now (temporary storage)
-    const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
-    const updatedEvents = [...storedEvents, { ...formData, rsvps: [] }];
-    localStorage.setItem("events", JSON.stringify(updatedEvents));
-    
+    // const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
+    // const updatedEvents = [...storedEvents, { ...formData, rsvps: [] }];
+    // localStorage.setItem("events", JSON.stringify(updatedEvents));
 
-    // redirect to event listing page
-    navigate("/events");
-  };
+    // adding to database
+    try {
+      await addDoc(collection(db, "events"), {
+        ...formData,
+        limit: parseInt(formData.limit),
+        rsvps: [],
+      });
+
+        navigate("/events");
+      } catch (error) {
+        console.error("Error saving event:", error);
+        alert("Something went wrong. Try again.");
+      }
+    };
 
   return (
     <div className="create-event-container">
