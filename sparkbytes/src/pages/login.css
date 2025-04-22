@@ -79,3 +79,20 @@ input {
 .register-button:hover {
   background-color: #689f38;
 }
+
+/* ==== FORGOT PASSWORD BUTTON ==== */
+.forgot-password-button {
+  background: none;
+  border: none;
+  color: #8d6e63;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.95rem;
+  margin-top: 8px;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.forgot-password-button:hover {
+  color: #a1887f;
+}

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 
-// firebae
+// firebase
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
 
 function Login() {
@@ -13,25 +14,6 @@ function Login() {
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  // const handleLogin = (e) => {
-  //   e.preventDefault();
-  //   setError("");
-
-  //   if (!formData.email || !formData.password) {
-  //     setError("Please enter both email and password");
-  //     return;
-  //   }
-
-  //   // Fake login (Replace with backend API call later)
-  //   if (formData.email === "test@example.com" && formData.password === "password123") {
-  //     localStorage.setItem("token", "fake-jwt-token");
-  //     alert("Login Successful!");
-  //     navigate("/dashboard");
-  //   } else {
-  //     setError("Invalid email or password");
-  //   }
-  // };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -55,8 +37,22 @@ function Login() {
       setError("Invalid email or password");
     }
   };
-  
 
+  const handleResetPassword = async () => {
+    if (!formData.email) {
+      setError("Enter your email to reset password");
+      return;
+    }
+  
+    try {
+      await sendPasswordResetEmail(auth, formData.email);
+      alert("Password reset email sent!");
+    } catch (err) {
+      console.error("Reset error:", err.message);
+      setError("Failed to send reset email. Try again.");
+    }
+  };
+  
   return (
     <div className="login-container">
       <div className="login-box">
@@ -78,6 +74,10 @@ function Login() {
             required
           />
           <button type="submit" className="login-button">Login</button>
+
+          <button type="button" onClick={handleResetPassword} className="forgot-password-button">
+            Forgot Password?
+          </button>
         </form>
         <p>
           Don't have an account?{" "}
