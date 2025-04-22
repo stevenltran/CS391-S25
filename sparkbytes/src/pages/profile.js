@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./profile.css";
 
 function Profile() {
-  const [user] = useState({
+  const [user, setUser] = useState({
     name: "Sarah",
     email: "sarah@bu.edu",
     role: "Student",
@@ -11,6 +11,19 @@ function Profile() {
     createdEvents: 0,
     profilePicture: "https://i.pravatar.cc/150?img=3",
   });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({ ...user });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSave = () => {
+    setUser({ ...formData });
+    setIsEditing(false);
+  };
 
   return (
     <div className="profile-wrapper">
@@ -25,23 +38,52 @@ function Profile() {
         <div className="profile-info">
           <div>
             <label>Name</label>
-            <p>{user.name}</p>
+            {isEditing ? (
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <p>{user.name}</p>
+            )}
           </div>
           <div>
             <label>Email</label>
-            <p>{user.email}</p>
+            {isEditing ? (
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+            ) : (
+              <p>{user.email}</p>
+            )}
           </div>
           <div>
             <label>Role</label>
-            <p>{user.role}</p>
+            {isEditing ? (
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+              >
+                <option value="Student">Student</option>
+                <option value="Organizer">Organizer</option>
+              </select>
+            ) : (
+              <p>{user.role}</p>
+            )}
           </div>
-          {user.role === "Student" && (
+          {user.role === "Student" && !isEditing && (
             <div>
               <label>Events Claimed</label>
               <p>{user.claimedEvents}</p>
             </div>
           )}
-          {user.role === "Organizer" && (
+          {user.role === "Organizer" && !isEditing && (
             <div>
               <label>Events Created</label>
               <p>{user.createdEvents}</p>
@@ -49,10 +91,17 @@ function Profile() {
           )}
         </div>
 
-        <button className="edit-btn">Edit Profile</button>
+        {isEditing ? (
+          <button className="save-btn" onClick={handleSave}>
+            Save
+          </button>
+        ) : (
+          <button className="edit-btn" onClick={() => setIsEditing(true)}>
+            Edit Profile
+          </button>
+        )}
       </div>
 
-     
       <Link to="/" className="home-btn">← Back to Home</Link>
     </div>
   );
