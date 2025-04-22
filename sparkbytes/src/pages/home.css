@@ -4,6 +4,7 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #fffaf0; /* Warm cream */
   color: #2e2e2e; /* Rich dark gray */
+  overflow-y: auto;
 }
 
 /* ==== NAVBAR ==== */
