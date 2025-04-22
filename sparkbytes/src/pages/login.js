@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 
+// firebae
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -10,24 +14,48 @@ function Login() {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleLogin = (e) => {
+  // const handleLogin = (e) => {
+  //   e.preventDefault();
+  //   setError("");
+
+  //   if (!formData.email || !formData.password) {
+  //     setError("Please enter both email and password");
+  //     return;
+  //   }
+
+  //   // Fake login (Replace with backend API call later)
+  //   if (formData.email === "test@example.com" && formData.password === "password123") {
+  //     localStorage.setItem("token", "fake-jwt-token");
+  //     alert("Login Successful!");
+  //     navigate("/dashboard");
+  //   } else {
+  //     setError("Invalid email or password");
+  //   }
+  // };
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
-    if (!formData.email || !formData.password) {
+  
+    const { email, password } = formData;
+  
+    if (!email || !password) {
       setError("Please enter both email and password");
       return;
     }
-
-    // Fake login (Replace with backend API call later)
-    if (formData.email === "test@example.com" && formData.password === "password123") {
-      localStorage.setItem("token", "fake-jwt-token");
-      alert("Login Successful!");
-      navigate("/dashboard");
-    } else {
+  
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+  
+      alert("Login successful!");
+      navigate("/events");
+    } catch (err) {
+      console.error("Login error:", err);
       setError("Invalid email or password");
     }
   };
+  
 
   return (
     <div className="login-container">
