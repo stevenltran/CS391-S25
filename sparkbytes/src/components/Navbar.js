@@ -22,7 +22,7 @@ function Navbar() {
             <LogoutButton />
             <Link to="/profile" className="navbar-button">Profile</Link>
             <Link to="/events" className="navbar-button">Events</Link>
-            <Link to="/createevent" className="navbar-button">Create Event</Link>
+            <Link to="/manageevents" className="navbar-button">My Events</Link>
             <Link to="/notifications" className="navbar-button">Notifications</Link>
           </>
         )}

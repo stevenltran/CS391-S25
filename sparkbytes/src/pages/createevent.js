@@ -5,8 +5,8 @@ import "./createevent.css";
 // firebase
 import { db } from "../firebase"; 
 import { collection, addDoc } from "firebase/firestore";
-
-function CreateEvent() {
+import { getAuth } from "firebase/auth";
+function CreateEventForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
@@ -29,15 +29,19 @@ function CreateEvent() {
     // const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
     // const updatedEvents = [...storedEvents, { ...formData, rsvps: [] }];
     // localStorage.setItem("events", JSON.stringify(updatedEvents));
-
+    
     // adding to database
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+    
       await addDoc(collection(db, "events"), {
         ...formData,
         limit: parseInt(formData.limit),
         rsvps: [],
+        creator: user?.uid || "unknown",
       });
-
+  
         navigate("/events");
       } catch (error) {
         console.error("Error saving event:", error);
@@ -105,4 +109,4 @@ function CreateEvent() {
   );
 }
 
-export default CreateEvent;
+export default CreateEventForm;

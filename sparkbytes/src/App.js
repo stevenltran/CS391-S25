@@ -9,6 +9,8 @@ import EventList from "./pages/eventlist";
 import Navbar from "./components/Navbar";
 import CreateEvent from "./pages/createevent";
 import Notifications from "./pages/notifications";
+import ManageEvents from "./pages/ManageEvents";
+import EditEvents from "./pages/EditEvents";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/createevent" element={<CreateEvent />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/manageevents" element={<ManageEvents />} />
+        <Route path="/edit/:id" element={<EditEvents />} />
       </Routes>
     </Router>
   );

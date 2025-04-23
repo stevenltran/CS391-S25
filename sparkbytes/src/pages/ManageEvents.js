@@ -1,0 +1,74 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { db } from "../firebase";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import ManageEventItem from "../components/ManageEventItem";
+import "./createevent.css"; // reused styles for layout
+
+function ManageEvents() {
+  const [myEvents, setMyEvents] = useState([]);
+  const navigate = useNavigate();
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "events"));
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        const mine = data.filter((event) => event.creator === user?.uid);
+        setMyEvents(mine);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+      }
+    };
+
+    if (user) {
+      fetchEvents();
+    }
+  }, [user]);
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, "events", id));
+      setMyEvents((prev) => prev.filter((event) => event.id !== id));
+    } catch (err) {
+      console.error("Error deleting event:", err);
+    }
+  };
+
+  return (
+    <div className="create-event-container">
+      <h2>My Created Events</h2>
+
+      <button
+        className="create-event-button"
+        onClick={() => navigate("/createevent")}
+      >
+        + Create New Event
+      </button>
+
+      {myEvents.length === 0 ? (
+        <p>You haven’t created any events yet.</p>
+      ) : (
+        <div className="event-list-container">
+          {myEvents.map((event) => (
+            <ManageEventItem
+              key={event.id}
+              event={event}
+              onEdit={() => navigate(`/edit/${event.id}`)} // we can build this page if you want
+              onDelete={() => handleDelete(event.id)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default ManageEvents;

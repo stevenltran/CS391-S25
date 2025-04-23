@@ -71,3 +71,22 @@
     width: 100%;
     box-sizing: border-box;
   }
+
+  .create-event-button {
+    background-color: #ff7043; /* tasty orange 🍊 */
+    color: white;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .create-event-button:hover {
+    background-color: #f4511e;
+    transform: translateY(-2px);
+  }
