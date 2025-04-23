@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase"; // adjust path if needed
+import { auth } from "../firebase";
 import "./login.css";
 
 function Register() {
@@ -24,16 +24,16 @@ function Register() {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-      console.log("Registered user:", user);
+        console.log("Registered user:", user);
 
-      alert("Account created successfully!");
-      navigate("/login");
+        alert("Account created successfully!");
+        navigate("/profile", { state: { editing: true } });
     } catch (err) {
-      console.error("Registration error:", err.message);
-      setError(err.message);
+        console.error("Registration error:", err.message);
+        setError(err.message);
     }
   };
 

@@ -1,35 +1,104 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./profile.css";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
+import { useAuth } from "../AuthContext";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 function Profile() {
-  const [user, setUser] = useState({
-    name: "Sarah",
-    email: "sarah@bu.edu",
-    role: "Student",
-    claimedEvents: 3,
-    createdEvents: 0,
-    profilePicture: "https://i.pravatar.cc/150?img=3",
-  });
+  const { currentUser } = useAuth();
+  const location = useLocation();
+  const [isEditing, setIsEditing] = useState(location.state?.editing || false);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...user });
+  const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState(null);
+
+  // Fetch profile data from Firestore
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!currentUser) return;
+
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+        setUser(data);
+        setFormData(data);
+      } else {
+        // Initialize profile with default values
+        const defaultProfile = {
+          name: "",
+          email: currentUser.email,
+          role: "Student",
+          claimedEvents: 0,
+          createdEvents: 0,
+          profilePicture: "https://i.pravatar.cc/150?img=3",
+        };
+        await setDoc(userRef, defaultProfile);
+        setUser(defaultProfile);
+        setFormData(defaultProfile);
+      }
+    };
+
+    fetchProfile();
+  }, [currentUser]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    setUser({ ...formData });
-    setIsEditing(false);
+  const handleProfilePicUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentUser) return;
+
+    const storage = getStorage();
+    const storageRef = ref(storage, `profilePictures/${currentUser.uid}`);
+
+    try {
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      setFormData((prev) => ({
+        ...prev,
+        profilePicture: downloadURL,
+      }));
+    } catch (err) {
+      console.error("Profile picture upload failed:", err);
+      alert("Failed to upload image.");
+    }
   };
+
+  const handleSave = async () => {
+    if (!currentUser || !formData) return;
+  
+    const userRef = doc(db, "users", currentUser.uid);
+    const updatedData = {
+      ...formData,
+      email: currentUser.email, // ensure email stays consistent
+    };
+  
+    console.log("Saving formData to Firestore:", updatedData);
+  
+    try {
+      await setDoc(userRef, updatedData);
+      setUser(updatedData);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      alert("Failed to save profile.");
+    }
+  };
+  
+  if (!user || !formData) return <p>Loading profile...</p>;
 
   return (
     <div className="profile-wrapper">
       <div className="profile-card">
         <img
-          src={user.profilePicture}
+          src={isEditing ? formData.profilePicture : user.profilePicture}
           alt="Profile"
           className="profile-picture"
         />
@@ -51,16 +120,7 @@ function Profile() {
           </div>
           <div>
             <label>Email</label>
-            {isEditing ? (
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <p>{user.email}</p>
-            )}
+            <p>{user.email}</p> {/* Email isn't editable */}
           </div>
           <div>
             <label>Role</label>
@@ -77,16 +137,25 @@ function Profile() {
               <p>{user.role}</p>
             )}
           </div>
+
           {user.role === "Student" && !isEditing && (
             <div>
               <label>Events Claimed</label>
               <p>{user.claimedEvents}</p>
             </div>
           )}
+
           {user.role === "Organizer" && !isEditing && (
             <div>
               <label>Events Created</label>
               <p>{user.createdEvents}</p>
+            </div>
+          )}
+
+          {isEditing && (
+            <div>
+              <label>Upload Profile Picture</label>
+              <input type="file" accept="image/*" onChange={handleProfilePicUpload} />
             </div>
           )}
         </div>
