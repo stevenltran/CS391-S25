@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import EventCard from "../components/EventCard";
 import { db } from "../firebase";
 import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
+import { useAuth } from "../AuthContext";
 import "./eventlist.css";
 
 function EventList() {
   const [filter, setFilter] = useState("All");
   const [events, setEvents] = useState([]);
+  const { currentUser } = useAuth();
 
   const foodTypes = ["All", "Vegan", "Halal", "Kosher", "Vegetarian", "Regular"];
 
@@ -28,17 +30,26 @@ function EventList() {
   }, []);
 
   const handleRSVP = async (index) => {
-    const user = "me"; // replace with real user later
+    if (!currentUser?.uid) {
+      alert("You must be logged in to RSVP!");
+      return;
+    }
+
+    const userId = currentUser.uid;
     const updated = [...events];
     const event = updated[index];
     const eventRef = doc(db, "events", event.id);
 
     let newRSVPs;
-    if (event.rsvps.includes(user)) {
-      newRSVPs = event.rsvps.filter((r) => r !== user);
+
+    if (event.rsvps.includes(userId)) {
+      // Cancel RSVP
+      newRSVPs = event.rsvps.filter((uid) => uid !== userId);
     } else if (event.rsvps.length < event.limit) {
-      newRSVPs = [...event.rsvps, user];
+      // Add RSVP
+      newRSVPs = [...event.rsvps, userId];
     } else {
+      alert("This event is full.");
       return;
     }
 
@@ -82,7 +93,7 @@ function EventList() {
             foodType={event.foodType}
             rsvps={event.rsvps}
             limit={event.limit}
-            isUserRSVPed={event.rsvps.includes("me")}
+            isUserRSVPed={event.rsvps.includes(currentUser?.uid)}
             isFull={event.rsvps.length >= event.limit}
             onRSVP={() => handleRSVP(index)}
           />

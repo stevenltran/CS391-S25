@@ -6,6 +6,7 @@ import "./createevent.css";
 import { db } from "../firebase"; 
 import { collection, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+
 function CreateEventForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -19,35 +20,34 @@ function CreateEventForm() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // save event to localStorage for now (temporary storage)
-    // const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
-    // const updatedEvents = [...storedEvents, { ...formData, rsvps: [] }];
-    // localStorage.setItem("events", JSON.stringify(updatedEvents));
-    
-    // adding to database
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      alert("You must be logged in to create an event.");
+      return;
+    }
+
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-    
       await addDoc(collection(db, "events"), {
         ...formData,
         limit: parseInt(formData.limit),
         rsvps: [],
-        creator: user?.uid || "unknown",
+        creator: user.uid,
+        createdAt: new Date(), // ✅ timestamp
       });
-  
-        navigate("/events");
-      } catch (error) {
-        console.error("Error saving event:", error);
-        alert("Something went wrong. Try again.");
-      }
-    };
+
+      navigate("/events");
+    } catch (error) {
+      console.error("Error saving event:", error);
+      alert("Something went wrong. Try again.");
+    }
+  };
 
   return (
     <div className="create-event-container">
@@ -85,13 +85,13 @@ function CreateEventForm() {
           onChange={handleChange}
           required
         >
-        <option value="">-- Select Food Type --</option>
-        <option value="Vegan">Vegan</option>
-        <option value="Halal">Halal</option>
-        <option value="Kosher">Kosher</option>
-        <option value="Vegetarian">Vegetarian</option>
-        <option value="Gluten-Free">Gluten-Free</option>
-        <option value="Regular">Regular</option>
+          <option value="">-- Select Food Type --</option>
+          <option value="Vegan">Vegan</option>
+          <option value="Halal">Halal</option>
+          <option value="Kosher">Kosher</option>
+          <option value="Vegetarian">Vegetarian</option>
+          <option value="Gluten-Free">Gluten-Free</option>
+          <option value="Regular">Regular</option>
         </select>
         
         <input

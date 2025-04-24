@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import ManageEventItem from "../components/ManageEventItem";
-import "./createevent.css"; // reused styles for layout
+import "./createevent.css";
 
 function ManageEvents() {
   const [myEvents, setMyEvents] = useState([]);
+  const [rsvpUserMap, setRsvpUserMap] = useState({});
   const navigate = useNavigate();
   const auth = getAuth();
   const user = auth.currentUser;
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchEventsAndRSVPs = async () => {
       try {
         const snapshot = await getDocs(collection(db, "events"));
         const data = snapshot.docs.map((doc) => ({
@@ -23,13 +30,30 @@ function ManageEvents() {
 
         const mine = data.filter((event) => event.creator === user?.uid);
         setMyEvents(mine);
+
+        // Fetch RSVP user data for each event
+        const userMap = {};
+        for (const event of mine) {
+          const rsvpUsers = await Promise.all(
+            (event.rsvps || []).map(async (uid) => {
+              if (userMap[uid]) return userMap[uid];
+              const userDoc = await getDoc(doc(db, "users", uid));
+              const userData = userDoc.exists()
+                ? { uid, ...userDoc.data() }
+                : { uid, email: "Unknown User" };
+              userMap[uid] = userData;
+              return userData;
+            })
+          );
+          setRsvpUserMap((prev) => ({ ...prev, [event.id]: rsvpUsers }));
+        }
       } catch (err) {
-        console.error("Error fetching events:", err);
+        console.error("Error fetching events or RSVP user data:", err);
       }
     };
 
     if (user) {
-      fetchEvents();
+      fetchEventsAndRSVPs();
     }
   }, [user]);
 
@@ -61,7 +85,8 @@ function ManageEvents() {
             <ManageEventItem
               key={event.id}
               event={event}
-              onEdit={() => navigate(`/edit/${event.id}`)} // we can build this page if you want
+              rsvpUsers={rsvpUserMap[event.id] || []}
+              onEdit={() => navigate(`/edit/${event.id}`)}
               onDelete={() => handleDelete(event.id)}
             />
           ))}
