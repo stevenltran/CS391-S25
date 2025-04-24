@@ -6,11 +6,11 @@ import { useAuth } from "../AuthContext";
 import "./eventlist.css";
 
 function EventList() {
-  const [filter, setFilter] = useState("All");
+  const [selectedTags, setSelectedTags] = useState([]);
   const [events, setEvents] = useState([]);
   const { currentUser } = useAuth();
 
-  const foodTypes = ["All", "Vegan", "Halal", "Kosher", "Vegetarian", "Regular"];
+  const foodTypes = ["Vegan", "Halal", "Kosher", "Vegetarian", "Gluten-Free"];
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -29,6 +29,12 @@ function EventList() {
     fetchEvents();
   }, []);
 
+  const toggleTag = (tag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
   const handleRSVP = async (index) => {
     if (!currentUser?.uid) {
       alert("You must be logged in to RSVP!");
@@ -43,10 +49,8 @@ function EventList() {
     let newRSVPs;
 
     if (event.rsvps.includes(userId)) {
-      // Cancel RSVP
       newRSVPs = event.rsvps.filter((uid) => uid !== userId);
     } else if (event.rsvps.length < event.limit) {
-      // Add RSVP
       newRSVPs = [...event.rsvps, userId];
     } else {
       alert("This event is full.");
@@ -61,10 +65,12 @@ function EventList() {
       console.error("Error updating RSVP:", err);
     }
   };
-
-  const filteredEvents = events.filter(
-    (event) => filter === "All" || event.foodType === filter
-  );
+  
+  const filteredEvents = events.filter((event) => {
+    if (selectedTags.length === 0) return true;
+    return selectedTags.every((tag) => event.tags?.includes(tag));
+  });
+  
 
   return (
     <div className="event-page">
@@ -74,8 +80,8 @@ function EventList() {
         {foodTypes.map((type) => (
           <button
             key={type}
-            className={filter === type ? "active" : ""}
-            onClick={() => setFilter(type)}
+            className={selectedTags.includes(type) ? "active" : ""}
+            onClick={() => toggleTag(type)}
           >
             {type}
           </button>
@@ -90,7 +96,7 @@ function EventList() {
             description={event.description}
             location={event.location}
             date={event.date}
-            foodType={event.foodType}
+            tags={event.tags}
             rsvps={event.rsvps}
             limit={event.limit}
             isUserRSVPed={event.rsvps.includes(currentUser?.uid)}

@@ -90,3 +90,32 @@
     background-color: #f4511e;
     transform: translateY(-2px);
   }
+
+  .tag-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-top: 4px;
+  }
+  
+  .tag-checkboxes input[type="checkbox"] {
+    display: none;
+  }
+  
+  .tag-checkboxes label {
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  
+  .tag-checkboxes label.selected {
+    background-color: #ff5e3a;
+    color: white;
+    border-color: #ff5e3a;
+  }

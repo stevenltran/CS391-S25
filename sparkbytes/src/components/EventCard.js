@@ -18,7 +18,7 @@ function EventCard({
   description,
   location,
   date,
-  foodType,
+  tags = [], // tags now replaces foodType
   rsvps,
   limit,
   onRSVP,
@@ -31,7 +31,13 @@ function EventCard({
       <p>{description}</p>
       <p><strong>Location:</strong> {location}</p>
       <p><strong>Date:</strong> {date}</p>
-      <p><strong>Food Type:</strong> {foodType}</p>
+
+      {/* Tags */}
+      <div className="event-tags">
+        {tags.map((tag) => (
+          <span className="tag" key={tag}>{tag}</span>
+        ))}
+      </div>
 
       {/* RSVP Badge */}
       <p className="rsvp-status">

@@ -45,3 +45,19 @@
     background-color: #e53935;
     color: white;
   }
+
+  .rsvp-list {
+    margin-top: 12px;
+  }
+  
+  .rsvp-list ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin: 4px 0 0;
+  }
+  
+  .rsvp-list li {
+    font-size: 0.9rem;
+    color: #444;
+  }
+  

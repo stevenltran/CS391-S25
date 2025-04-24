@@ -9,8 +9,8 @@ import EventList from "./pages/eventlist";
 import Navbar from "./components/Navbar";
 import CreateEvent from "./pages/createevent";
 import Notifications from "./pages/notifications";
-import ManageEvents from "./pages/ManageEvents";
-import EditEvents from "./pages/EditEvents";
+import ManageEvents from "./pages/manageevents";
+import EditEvents from "./pages/editevent";
 
 function App() {
   return (

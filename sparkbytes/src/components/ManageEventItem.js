@@ -1,24 +1,28 @@
 import "./ManageEventItem.css";
 
-function ManageEventItem({ event, onEdit, onDelete, rsvpUsers = [] }) {
+function ManageEventItem({ event, onEdit, onDelete, rsvpUsers }) {
   return (
     <div className="manage-event-item">
       <div className="event-info">
         <h3>{event.title}</h3>
         <p><strong>Date:</strong> {event.date}</p>
         <p><strong>Location:</strong> {event.location}</p>
-        <p><strong>Food Type:</strong> {event.foodType}</p>
         <p><strong>RSVP Limit:</strong> {event.limit}</p>
-        <p><strong>RSVP Count:</strong> {event.rsvps?.length || 0}</p>
 
+        {/* Food Type (comma-separated list) */}
+        {event.tags && event.tags.length > 0 && (
+          <p>
+            <strong>Food Type:</strong> {event.tags.join(", ")}
+          </p>
+        )}
+
+        {/* RSVP user list */}
         {rsvpUsers.length > 0 && (
           <div className="rsvp-list">
-            <p><strong>RSVPed Users:</strong></p>
+            <strong>RSVPs:</strong>
             <ul>
               {rsvpUsers.map((user) => (
-                <li key={user.uid}>
-                  {user.name || user.email || "Unknown"}
-                </li>
+                <li key={user.uid}>{user.name || user.email}</li>
               ))}
             </ul>
           </div>

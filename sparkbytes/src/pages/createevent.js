@@ -14,8 +14,10 @@ function CreateEventForm() {
     description: "",
     location: "",
     date: "",
-    foodType: "", 
+    startTime: "",
+    tags: [], // changed from food type to allow multiple selections
     limit: "",
+    foodGone: false,
   });
 
   const handleChange = (e) => {
@@ -39,7 +41,8 @@ function CreateEventForm() {
         limit: parseInt(formData.limit),
         rsvps: [],
         creator: user.uid,
-        createdAt: new Date(), // ✅ timestamp
+        createdAt: new Date(),
+        foodGone: false,
       });
 
       navigate("/events");
@@ -73,26 +76,44 @@ function CreateEventForm() {
           onChange={handleChange} 
           required 
         />
+
+        <label><strong>Date</strong></label>
         <input 
           type="date" 
           name="date" 
           onChange={handleChange} 
           required 
         />
-        <select
-          name="foodType"
-          value={formData.foodType}
+        
+        <label><strong>Start Time:</strong></label>
+        <input 
+          type="time" 
+          name="startTime" 
+          value={formData.startTime}
           onChange={handleChange}
-          required
-        >
-          <option value="">-- Select Food Type --</option>
-          <option value="Vegan">Vegan</option>
-          <option value="Halal">Halal</option>
-          <option value="Kosher">Kosher</option>
-          <option value="Vegetarian">Vegetarian</option>
-          <option value="Gluten-Free">Gluten-Free</option>
-          <option value="Regular">Regular</option>
-        </select>
+          required 
+        />
+
+        <div className="tag-checkboxes">
+          {["Vegan", "Halal", "Kosher", "Vegetarian", "Gluten-Free"].map((tag) => (
+            <label
+              key={tag}
+              className={formData.tags.includes(tag) ? "selected" : ""}
+              onClick={() => {
+                const isSelected = formData.tags.includes(tag);
+                setFormData((prev) => ({
+                  ...prev,
+                  tags: isSelected
+                    ? prev.tags.filter((t) => t !== tag)
+                    : [...prev.tags, tag],
+                }));
+              }}
+            >
+              {tag}
+          </label>          
+          ))}
+        </div>
+
         
         <input
           type="number"

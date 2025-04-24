@@ -5,6 +5,8 @@ import { db } from "../firebase";
 import "./createevent.css";
 import { useAuth } from "../AuthContext";
 
+const AVAILABLE_TAGS = ["Vegan", "Halal", "Kosher", "Vegetarian", "Gluten-Free"];
+
 function EditEvent() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -20,13 +22,15 @@ function EditEvent() {
         if (docSnap.exists()) {
           const data = docSnap.data();
 
-          // Block if user isn't the creator
           if (data.creator !== currentUser?.uid) {
             alert("You are not allowed to edit this event.");
             return navigate("/events");
           }
 
-          setFormData(data);
+          setFormData({
+            ...data,
+            tags: data.tags || []
+          });
         } else {
           alert("Event not found.");
           navigate("/manageevents");
@@ -36,15 +40,22 @@ function EditEvent() {
       }
     };
 
-    if (currentUser) {
-      fetchEvent();
-    }
+    if (currentUser) fetchEvent();
   }, [id, navigate, currentUser]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }));
+  };
+
+  const toggleTag = (tag) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag)
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag],
     }));
   };
 
@@ -100,20 +111,24 @@ function EditEvent() {
           onChange={handleChange}
           required
         />
-        <select
-          name="foodType"
-          value={formData.foodType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">-- Select Food Type --</option>
-          <option value="Vegan">Vegan</option>
-          <option value="Halal">Halal</option>
-          <option value="Kosher">Kosher</option>
-          <option value="Vegetarian">Vegetarian</option>
-          <option value="Gluten-Free">Gluten-Free</option>
-          <option value="Regular">Regular</option>
-        </select>
+
+        {/* Tag checkboxes */}
+        <div className="tag-checkboxes">
+          {AVAILABLE_TAGS.map((tag) => (
+            <label
+              key={tag}
+              className={formData.tags.includes(tag) ? "selected" : ""}
+            >
+              <input
+                type="checkbox"
+                value={tag}
+                checked={formData.tags.includes(tag)}
+                onChange={() => toggleTag(tag)}
+              />
+              {tag}
+            </label>
+          ))}
+        </div>
 
         <input
           type="number"

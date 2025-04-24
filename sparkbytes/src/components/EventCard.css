@@ -43,3 +43,20 @@
 .event-card strong {
   color: #222;
 }
+
+.event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.tag {
+  background-color: #ffecd9;
+  color: #444;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #ffc8a2;
+}
