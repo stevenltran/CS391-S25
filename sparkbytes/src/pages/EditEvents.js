@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import "./createevent.css";
+import { useAuth } from "../AuthContext";
 
 function EditEvent() {
-  const { id } = useParams(); // Get event ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState(null);
 
   useEffect(() => {
@@ -14,8 +16,17 @@ function EditEvent() {
       try {
         const docRef = doc(db, "events", id);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
-          setFormData(docSnap.data());
+          const data = docSnap.data();
+
+          // Block if user isn't the creator
+          if (data.creator !== currentUser?.uid) {
+            alert("You are not allowed to edit this event.");
+            return navigate("/events");
+          }
+
+          setFormData(data);
         } else {
           alert("Event not found.");
           navigate("/manageevents");
@@ -25,8 +36,10 @@ function EditEvent() {
       }
     };
 
-    fetchEvent();
-  }, [id, navigate]);
+    if (currentUser) {
+      fetchEvent();
+    }
+  }, [id, navigate, currentUser]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
