@@ -1,0 +1,99 @@
+/* eslint-disable */
+
+const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {getFirestore} = require("firebase-admin/firestore");
+const {getMessaging} = require("firebase-admin/messaging");
+const admin = require("firebase-admin");
+
+admin.initializeApp();
+const db = getFirestore();
+const messaging = getMessaging();
+
+function getEasternNowDateString() {
+  const now = new Date();
+  now.setHours(now.getHours() - 4); // Adjust -4h for Eastern (EDT)
+  return now.toISOString().split("T")[0];
+}
+
+exports.sendEventReminders = onSchedule("every 1 minutes", async (event) => {
+  console.log("Checking for upcoming events...");
+
+  const nowDateString = getEasternNowDateString();
+  console.log(`Today in Eastern Time: ${nowDateString}`);
+  
+  try {
+    const eventsSnapshot = await db
+        .collection("events")
+        .where("date", ">=", nowDateString)
+        .get();
+
+    const events = eventsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log(`Found ${events.length} upcoming events`);
+
+    for (const event of events) {
+      if (!event.startTime || !event.date) {
+        console.warn(`Skipping event without startTime/date: ${event.title}`);
+        continue;
+      }
+
+      const [time, modifier] = event.startTime.split(" ");
+      let [hours, minutes] = time.split(":").map(Number);
+
+      // Convert 12-hour format to 24-hour
+      if (modifier === "PM" && hours !== 12) {
+        hours += 12;
+      }
+      if (modifier === "AM" && hours === 12) {
+        hours = 0;
+      }
+
+      // Create event date assuming EST timezone
+      const eventDate = new Date(event.date);
+      eventDate.setHours(hours);
+      eventDate.setMinutes(minutes);
+      eventDate.setSeconds(0);
+      eventDate.setMilliseconds(0);
+
+      // Convert EST -> UTC (+4 hours offset)
+      const eventStartUTC = new Date(eventDate.getTime() + 4 * 60 * 60 * 1000);
+      const timeDiff = eventStartUTC.getTime() - Date.now();
+
+      console.log(`Time till "${event.title}": ${Math.round(timeDiff / 1000)}`);
+
+      if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000 && !event.reminder15Sent) {
+        console.log(`Sending reminder for event: ${event.title}`);
+
+        const rsvps = event.rsvps || [];
+
+        for (const userId of rsvps) {
+          const userDoc = await db.collection("users").doc(userId).get();
+          const userData = userDoc.data();
+
+          if (userData?.fcmToken) {
+            await messaging.send({
+              token: userData.fcmToken,
+              notification: {
+                title: `Reminder: ${event.title}`,
+                body: `Starting soon at ${event.startTime}!`,
+              },
+            });
+            console.log(`Notification sent to user: ${userId}`);
+          }
+        }
+
+        await db.collection("events").doc(event.id).update({
+          reminder15Sent: true,
+        });
+        console.log(`Marked event ${event.id} as reminder15Sent`);
+      }
+    }
+  } catch (err) {
+    console.error("Error sending reminders:", err);
+  }
+
+  return null;
+});

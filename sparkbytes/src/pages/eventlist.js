@@ -65,12 +65,11 @@ function EventList() {
       console.error("Error updating RSVP:", err);
     }
   };
-  
+
   const filteredEvents = events.filter((event) => {
     if (selectedTags.length === 0) return true;
     return selectedTags.every((tag) => event.tags?.includes(tag));
   });
-  
 
   return (
     <div className="event-page">
@@ -96,6 +95,7 @@ function EventList() {
             description={event.description}
             location={event.location}
             date={event.date}
+            startTime={event.startTime} 
             tags={event.tags}
             rsvps={event.rsvps}
             limit={event.limit}

@@ -2,34 +2,53 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 
-// firebase
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase";
+// firebase auth
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { auth, db, messaging } from "../firebase";
+
+// firebase notifications
+import { getToken } from "firebase/messaging";
+import { doc, updateDoc } from "firebase/firestore";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-  
+
     const { email, password } = formData;
-  
+
     if (!email || !password) {
       setError("Please enter both email and password");
       return;
     }
-  
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-  
+
+      // completely new FCM token
+      const fcmToken = await getToken(messaging, {
+        vapidKey: "BLY2BMeZnaaM3Y5riTslRfRdpZkvDFBVcAfsMUZl_Z_PJo982YmvVo7ev3rH3TKkY6FKjLugMnT9GtDNaNNTT_0",
+      });
+
+      if (fcmToken) {
+        // update db
+        await updateDoc(doc(db, "users", user.uid), {
+          fcmToken: fcmToken,
+        });
+        console.log("Saved FCM token:", fcmToken);
+      } else {
+        console.warn("No FCM token retrieved.");
+      }
+
       alert("Login successful!");
       navigate("/events");
     } catch (err) {
@@ -43,7 +62,7 @@ function Login() {
       setError("Enter your email to reset password");
       return;
     }
-  
+
     try {
       await sendPasswordResetEmail(auth, formData.email);
       alert("Password reset email sent!");
@@ -52,7 +71,7 @@ function Login() {
       setError("Failed to send reset email. Try again.");
     }
   };
-  
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -75,7 +94,11 @@ function Login() {
           />
           <button type="submit" className="login-button">Login</button>
 
-          <button type="button" onClick={handleResetPassword} className="forgot-password-button">
+          <button
+            type="button"
+            onClick={handleResetPassword}
+            className="forgot-password-button"
+          >
             Forgot Password?
           </button>
         </form>

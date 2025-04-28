@@ -5,7 +5,10 @@ function ManageEventItem({ event, onEdit, onDelete, rsvpUsers }) {
     <div className="manage-event-item">
       <div className="event-info">
         <h3>{event.title}</h3>
-        <p><strong>Date:</strong> {event.date}</p>
+
+        {/* Date and Time combined */}
+        <p><strong>Date & Time:</strong> {event.date} {event.startTime}</p>
+
         <p><strong>Location:</strong> {event.location}</p>
         <p><strong>RSVP Limit:</strong> {event.limit}</p>
 

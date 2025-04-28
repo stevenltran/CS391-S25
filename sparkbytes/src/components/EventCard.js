@@ -18,7 +18,8 @@ function EventCard({
   description,
   location,
   date,
-  tags = [], // tags now replaces foodType
+  startTime, // added startTime
+  tags = [],
   rsvps,
   limit,
   onRSVP,
@@ -31,6 +32,7 @@ function EventCard({
       <p>{description}</p>
       <p><strong>Location:</strong> {location}</p>
       <p><strong>Date:</strong> {date}</p>
+      <p><strong>Time:</strong> {startTime}</p> {/* New Line for Time */}
 
       {/* Tags */}
       <div className="event-tags">

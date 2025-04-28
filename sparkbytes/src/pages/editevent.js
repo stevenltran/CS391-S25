@@ -61,10 +61,22 @@ function EditEvent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Format startTime before saving
+    let formattedTime = formData.startTime;
+    if (formattedTime && formattedTime.includes(":") && !formattedTime.includes("AM") && !formattedTime.includes("PM")) {
+      const [hourStr, minute] = formattedTime.split(":");
+      let hour = parseInt(hourStr, 10);
+      const ampm = hour >= 12 ? "PM" : "AM";
+      hour = hour % 12 || 12;
+      formattedTime = `${hour}:${minute} ${ampm}`;
+    }
+
     try {
       const docRef = doc(db, "events", id);
       await updateDoc(docRef, {
         ...formData,
+        startTime: formattedTime,
         limit: parseInt(formData.limit),
       });
       alert("Event updated successfully!");
@@ -104,6 +116,7 @@ function EditEvent() {
           onChange={handleChange}
           required
         />
+        <label><strong>Date:</strong></label>
         <input
           type="date"
           name="date"
@@ -111,20 +124,23 @@ function EditEvent() {
           onChange={handleChange}
           required
         />
+        <label><strong>Start Time:</strong></label>
+        <input
+          type="time"
+          name="startTime"
+          value={formData.startTime.split(" ")[0]} // show clean input without AM/PM
+          onChange={handleChange}
+          required
+        />
 
-        {/* Tag checkboxes */}
+        <label><strong>Food Type:</strong></label>
         <div className="tag-checkboxes">
           {AVAILABLE_TAGS.map((tag) => (
             <label
               key={tag}
               className={formData.tags.includes(tag) ? "selected" : ""}
+              onClick={() => toggleTag(tag)}
             >
-              <input
-                type="checkbox"
-                value={tag}
-                checked={formData.tags.includes(tag)}
-                onChange={() => toggleTag(tag)}
-              />
               {tag}
             </label>
           ))}

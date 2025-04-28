@@ -15,7 +15,7 @@ function CreateEventForm() {
     location: "",
     date: "",
     startTime: "",
-    tags: [], // changed from food type to allow multiple selections
+    tags: [],
     limit: "",
     foodGone: false,
   });
@@ -35,14 +35,26 @@ function CreateEventForm() {
       return;
     }
 
+    const rawTime = formData.startTime; 
+    let formattedTime = "";
+    if (rawTime) {
+      const [hourStr, minute] = rawTime.split(":");
+      let hour = parseInt(hourStr, 10);
+      const ampm = hour >= 12 ? "PM" : "AM";
+      hour = hour % 12 || 12;
+      formattedTime = `${hour}:${minute} ${ampm}`;
+    }
+
     try {
       await addDoc(collection(db, "events"), {
         ...formData,
+        startTime: formattedTime,
         limit: parseInt(formData.limit),
         rsvps: [],
         creator: user.uid,
         createdAt: new Date(),
         foodGone: false,
+        reminder15Sent: false,
       });
 
       navigate("/events");
@@ -77,14 +89,14 @@ function CreateEventForm() {
           required 
         />
 
-        <label><strong>Date</strong></label>
+        <label><strong>Date:</strong></label>
         <input 
           type="date" 
           name="date" 
           onChange={handleChange} 
           required 
         />
-        
+
         <label><strong>Start Time:</strong></label>
         <input 
           type="time" 
@@ -94,6 +106,7 @@ function CreateEventForm() {
           required 
         />
 
+        <label><strong>Food Type:</strong></label>
         <div className="tag-checkboxes">
           {["Vegan", "Halal", "Kosher", "Vegetarian", "Gluten-Free"].map((tag) => (
             <label
@@ -110,11 +123,10 @@ function CreateEventForm() {
               }}
             >
               {tag}
-          </label>          
+            </label>
           ))}
         </div>
 
-        
         <input
           type="number"
           name="limit"

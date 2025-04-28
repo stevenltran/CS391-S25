@@ -1,41 +1,56 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
+import { useAuth } from "../AuthContext";
+import NotificationCard from "../components/NotificationCard";
 import "./notifications.css";
 
 function Notifications() {
-  const [notifications] = useState([
-    {
-      id: 1,
-      message: "You successfully claimed a meal from BU Dining!",
-      time: "2 hours ago",
-    },
-    {
-      id: 2,
-      message: "Your event 'Late Night Snacks' has 25 RSVPs.",
-      time: "1 day ago",
-    },
-    {
-      id: 3,
-      message: "Your profile was updated.",
-      time: "3 days ago",
-    },
-  ]);
+  const { currentUser } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!currentUser) return;
+
+      const q = query(
+        collection(db, "notifications"),
+        where("userId", "==", currentUser.uid)
+      );
+
+      const snapshot = await getDocs(q);
+      const fetched = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setNotifications(fetched.sort((a, b) => 
+        b.timestamp?.toDate() - a.timestamp?.toDate()
+      ));
+    };
+
+    fetchNotifications();
+  }, [currentUser]);
 
   return (
     <div className="notif-wrapper">
       <div className="notif-card">
         <h1>Notifications</h1>
+
         {notifications.length === 0 ? (
           <p className="empty-msg">No new notifications.</p>
         ) : (
-          <ul className="notif-list">
+          <div className="notif-list">
             {notifications.map((n) => (
-              <li key={n.id}>
-                <p className="notif-text">{n.message}</p>
-                <span className="notif-time">{n.time}</span>
-              </li>
+              <NotificationCard
+                key={n.id}
+                title={n.title}
+                body={n.body}
+                receivedAt={n.timestamp?.toDate().toISOString() || new Date().toISOString()}
+              />
             ))}
-          </ul>
+          </div>
         )}
       </div>
 
