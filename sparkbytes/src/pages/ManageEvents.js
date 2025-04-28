@@ -12,6 +12,9 @@ import { getAuth } from "firebase/auth";
 import ManageEventItem from "../components/ManageEventItem";
 import "./createevent.css";
 
+import { functions } from "../firebase";
+import { httpsCallable } from "firebase/functions";
+
 function ManageEvents() {
   const [myEvents, setMyEvents] = useState([]);
   const [rsvpUserMap, setRsvpUserMap] = useState({});
@@ -66,6 +69,31 @@ function ManageEvents() {
     }
   };
 
+  const handleCloseEvent = async (event) => {
+    if (!window.confirm("Are you sure you want to close and delete this event? This will notify all RSVPed users and remove the event.")) {
+      return;
+    }
+  
+    try {
+      // Call the closeEvent cloud function
+      const closeEventFunc = httpsCallable(functions, "closeEvent");
+      await closeEventFunc({ eventId: event.id });
+  
+      // Delete the event from Firestore
+      await deleteDoc(doc(db, "events", event.id));
+  
+      // Update the local state to remove the event from the list
+      setMyEvents((prev) => prev.filter((e) => e.id !== event.id));
+  
+      alert("Event closed, notifications sent, and event deleted.");
+  
+    } catch (error) {
+      console.error("Error closing or deleting event:", error);
+      alert("There was an error. Please try again.");
+    }
+  };
+  
+
   return (
     <div className="create-event-container">
       <h2>My Created Events</h2>
@@ -88,6 +116,7 @@ function ManageEvents() {
               rsvpUsers={rsvpUserMap[event.id] || []}
               onEdit={() => navigate(`/edit/${event.id}`)}
               onDelete={() => handleDelete(event.id)}
+              onClose={() => handleCloseEvent(event)}
             />
           ))}
         </div>

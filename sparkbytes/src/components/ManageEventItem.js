@@ -1,6 +1,6 @@
 import "./ManageEventItem.css";
 
-function ManageEventItem({ event, onEdit, onDelete, rsvpUsers }) {
+function ManageEventItem({ event, onEdit, onDelete, rsvpUsers, onClose }) {
   return (
     <div className="manage-event-item">
       <div className="event-info">
@@ -34,6 +34,7 @@ function ManageEventItem({ event, onEdit, onDelete, rsvpUsers }) {
 
       <div className="event-actions">
         <button className="edit-button" onClick={onEdit}>Edit</button>
+        <button className="close-button"onClick={onClose}>Close Event</button>
         <button className="delete-button" onClick={onDelete}>Delete</button>
       </div>
     </div>

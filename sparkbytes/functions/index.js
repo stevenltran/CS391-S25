@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 const {onSchedule} = require("firebase-functions/v2/scheduler");
+const { onCall } = require("firebase-functions/v2/https");
 const {getFirestore} = require("firebase-admin/firestore");
 const {getMessaging} = require("firebase-admin/messaging");
 const admin = require("firebase-admin");
@@ -15,6 +16,8 @@ function getEasternNowDateString() {
   return now.toISOString().split("T")[0];
 }
 
+// This function checks for events that are starting within the next 15 minutes
+// and sends reminders via FCM and email to users who have RSVP'd.
 exports.sendEventReminders = onSchedule("every 1 minutes", async (event) => {
   console.log("Checking for upcoming events...");
 
@@ -121,4 +124,72 @@ exports.sendEventReminders = onSchedule("every 1 minutes", async (event) => {
   }
 
   return null;
+});
+
+
+// This function is triggered when an event is closed.
+// It sends push notifications and emails to all users who have RSVP'd.
+exports.closeEvent = onCall(async (request) => {
+  const { eventId } = request.data;
+
+  if (!eventId) {
+    throw new Error("Missing eventId");
+  }
+
+  const eventRef = db.collection("events").doc(eventId);
+  const eventDoc = await eventRef.get();
+  const eventData = eventDoc.data();
+
+  if (!eventData) {
+    throw new Error("Event not found");
+  }
+
+  const rsvps = eventData.rsvps || [];
+
+  for (const userId of rsvps) {
+    const userDoc = await db.collection("users").doc(userId).get();
+    const userData = userDoc.data();
+
+    if (!userData) {
+      console.warn(`User ${userId} not found`);
+      continue;
+    }
+
+    // Send push notification if user has FCM token
+    if (userData?.fcmToken) {
+      await messaging.send({
+        token: userData.fcmToken,
+        notification: {
+          title: "Event Closed",
+          body: `The event "${eventData.title}" has now closed.`,
+        },
+      });
+      console.log(`Push notification sent to user: ${userId}`);
+    }
+
+    // Send email if user has email
+    if (userData?.email) {
+      await db.collection("mail").add({
+        to: [userData.email],
+        message: {
+          subject: `Closed: ${eventData.title}`,
+          text: `Hi ${userData.name || "there"},\n\nSorry, but the event "${eventData.title}" has now closed.\n\n- SparkBytes Team`,
+          html: `
+            <div style="font-family: Arial, sans-serif; font-size: 16px;">
+              <p>Hi ${userData.name || "there"},</p>
+              <p>The event <strong>${eventData.title}</strong> has now closed.</p>
+              <p>Thank you for being part of SparkBytes! We hope to see you again soon.</p>
+              <br/>
+              <p>- The SparkBytes Team</p>
+            </div>
+          `,
+        },
+      });
+      console.log(`Email queued for user: ${userId}`);
+    } else {
+      console.warn(`User ${userId} has no email`);
+    }
+  }
+
+  return { success: true };
 });
