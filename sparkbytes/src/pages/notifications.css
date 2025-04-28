@@ -78,3 +78,20 @@
     background-color: #689f38;
     transform: translateY(-2px);
   }
+
+  .dismiss-btn {
+    margin-top: 10px;
+    padding: 6px 16px;
+    background-color: #ff7043;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    align-self: flex-start;
+  }
+  
+  .dismiss-btn:hover {
+    background-color: #f4511e;
+  }

@@ -5,6 +5,7 @@ import { db } from "../firebase";
 import { useAuth } from "../AuthContext";
 import NotificationCard from "../components/NotificationCard";
 import "./notifications.css";
+import { deleteDoc, doc } from "firebase/firestore";
 
 function Notifications() {
   const { currentUser } = useAuth();
@@ -33,6 +34,21 @@ function Notifications() {
     fetchNotifications();
   }, [currentUser]);
 
+  // Function to handle deleting a notification
+  const handleDismiss = async (notifId) => {
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, "notifications", notifId));
+  
+      // Update local state to remove the dismissed notification
+      setNotifications((prev) => prev.filter((n) => n.id !== notifId));
+  
+    } catch (error) {
+      console.error("Error dismissing notification:", error);
+      alert("Failed to dismiss notification. Please try again.");
+    }
+  };
+
   return (
     <div className="notif-wrapper">
       <div className="notif-card">
@@ -48,6 +64,7 @@ function Notifications() {
                 title={n.title}
                 body={n.body}
                 receivedAt={n.timestamp?.toDate().toISOString() || new Date().toISOString()}
+                onDismiss={() => handleDismiss(n.id)}
               />
             ))}
           </div>
