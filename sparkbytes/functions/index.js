@@ -77,12 +77,37 @@ exports.sendEventReminders = onSchedule("every 1 minutes", async (event) => {
             await messaging.send({
               token: userData.fcmToken,
               notification: {
-                title: `Reminder: ${event.title}`,
+                title: `${event.title}`,
                 body: `Starting soon at ${event.startTime}!`,
               },
             });
             console.log(`Notification sent to user: ${userId}`);
           }
+
+          // send email
+          if (userData?.email) {
+            await db.collection("mail").add({
+              to: [userData.email],
+              message: {
+                subject: `Reminder: ${event.title} is starting soon!`,
+                text: `Hi ${userData.name || "there"},\n\nYour event "${event.title}" is starting at ${event.startTime}.\n\nSee you there!\n\n- SparkBytes Team`,
+                html: `
+                  <div style="font-family: Arial, sans-serif; font-size: 16px;">
+                    <p>Hi ${userData.name || "there"},</p>
+                    <p>This is a reminder that your event <strong>${event.title}</strong> is starting soon at <strong>${event.startTime}</strong>.
+                    Please head to ${event.location || "the location"} to claim your food! </p>
+                    <p>We hope to see you there!</p>
+                    <br/>
+                    <p>- The SparkBytes Team</p>
+                  </div>
+                `,
+              },
+            });
+            console.log(`Email queued for user: ${userId}`);
+          } else {
+            console.warn(`User ${userId} has no email`);
+          }
+          
         }
 
         await db.collection("events").doc(event.id).update({
