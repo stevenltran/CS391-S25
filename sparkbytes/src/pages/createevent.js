@@ -43,38 +43,27 @@ function CreateEventForm() {
       return;
     }
 
-    // Check that the event time is in the future
-    const eventDateTime = new Date(`${formData.date}T${formData.startTime}`);
+    const { date, startTime, endTime } = formData;
+    const eventDateTime = new Date(`${date}T${startTime}`);
+    const now = new Date();
 
     if (isNaN(eventDateTime.getTime())) {
       alert("Invalid date or time.");
       return;
     }
-    
-    if (eventDateTime <= new Date()) {
+
+    if (eventDateTime <= now) {
       alert("Please select a future time for the event.");
       return;
     }
 
-    // Format time for display
-    const rawTime = formData.startTime;
-    let formattedTime = "";
-    if (rawTime) {
-      const [hourStr, min] = rawTime.split(":");
-      let hr = parseInt(hourStr, 10);
-      const ampm = hr >= 12 ? "PM" : "AM";
-      hr = hr % 12 || 12;
-      formattedTime = `${hr}:${min} ${ampm}`;
-    const start = formData.startTime;
-    const end = formData.endTime;
-
-    if (start && end && start >= end) {
+    if (startTime && endTime && startTime >= endTime) {
       alert("End time must be after start time.");
       return;
     }
 
-    const formattedStart = formatTime(start);
-    const formattedEnd = formatTime(end);
+    const formattedStart = formatTime(startTime);
+    const formattedEnd = formatTime(endTime);
 
     try {
       await addDoc(collection(db, "events"), {
