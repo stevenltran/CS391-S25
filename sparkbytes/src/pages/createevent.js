@@ -43,39 +43,13 @@ function CreateEventForm() {
       return;
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     const { date, startTime, endTime } = formData;
     const eventDateTime = new Date(`${date}T${startTime}`);
     const now = new Date();
-=======
-    // Check that the event time is in the future
-    const eventDateTime = new Date(`${formData.date}T${formData.startTime}`);
->>>>>>> 3b7f30e (icon changed)
 
     if (isNaN(eventDateTime.getTime())) {
       alert("Invalid date or time.");
       return;
-<<<<<<< HEAD
-=======
-    }
-    
-    if (eventDateTime <= new Date()) {
-      alert("Please select a future time for the event.");
-      return;
-    }
-
-    // Format time for display
-    const rawTime = formData.startTime;
-    let formattedTime = "";
-    if (rawTime) {
-      const [hourStr, min] = rawTime.split(":");
-      let hr = parseInt(hourStr, 10);
-      const ampm = hr >= 12 ? "PM" : "AM";
-      hr = hr % 12 || 12;
-      formattedTime = `${hr}:${min} ${ampm}`;
-<<<<<<< HEAD
->>>>>>> 3b7f30e (icon changed)
     }
 
     if (eventDateTime <= now) {
@@ -90,37 +64,6 @@ function CreateEventForm() {
 
     const formattedStart = formatTime(startTime);
     const formattedEnd = formatTime(endTime);
-=======
-    const start = formData.startTime;
-    const end = formData.endTime;
-
-    if (start && end && start >= end) {
-      alert("End time must be after start time.");
-=======
-=======
->>>>>>> f765f7f (createevent cleanup)
-    const { date, startTime, endTime } = formData;
-    const eventDateTime = new Date(`${date}T${startTime}`);
-    const now = new Date();
-
-    if (isNaN(eventDateTime.getTime())) {
-      alert("Invalid date or time.");
-      return;
-    }
-
-    if (eventDateTime <= now) {
-      alert("Please select a future time for the event.");
-      return;
-    }
-
-    if (startTime && endTime && startTime >= endTime) {
-      alert("End time must be after start time.");
-      return;
-    }
-
-    const formattedStart = formatTime(start);
-    const formattedEnd = formatTime(end);
->>>>>>> c5ffa16 (Added end time + sparkbytes logo select)
 
     try {
       await addDoc(collection(db, "events"), {
@@ -183,17 +126,6 @@ function CreateEventForm() {
           value={formData.startTime}
           onChange={handleChange}
           required
-<<<<<<< HEAD
-        />
-
-        <label><strong>End Time:</strong></label>
-        <input 
-          type="time" 
-          name="endTime" 
-          value={formData.endTime}
-          onChange={handleChange}
-=======
->>>>>>> 3b7f30e (icon changed)
         />
 
         <label><strong>End Time:</strong></label>

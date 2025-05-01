@@ -42,14 +42,9 @@ function EventCard({
           {location}
         </a>
       </p>
-<<<<<<< HEAD
 
       <p><strong>Date:</strong> {date}</p>
 
-=======
-      <p><strong>Date:</strong> {date}</p>
-      
->>>>>>> c5ffa16 (Added end time + sparkbytes logo select)
       <p>
         <strong>Time:</strong>{" "}
         {endTime ? `${startTime} – ${endTime}` : startTime}
