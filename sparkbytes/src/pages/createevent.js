@@ -13,6 +13,7 @@ function CreateEventForm() {
     location: "",
     date: "",
     startTime: "",
+    endTime: "",
     tags: [],
     limit: "",
     foodGone: false,
@@ -20,6 +21,15 @@ function CreateEventForm() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const formatTime = (rawTime) => {
+    if (!rawTime) return "";
+    const [hourStr, minute] = rawTime.split(":");
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
   };
 
   const handleSubmit = async (e) => {
@@ -33,34 +43,70 @@ function CreateEventForm() {
       return;
     }
 
-    // Check that the event time is in the future
-    const eventDateTime = new Date(`${formData.date}T${formData.startTime}`);
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (isNaN(eventDateTime.getTime())) {
-      alert("Invalid date or time.");
-      return;
-    }
-    
-    if (eventDateTime <= new Date()) {
-      alert("Please select a future time for the event.");
-      return;
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  if (!user) {
+    alert("You must be logged in to create an event.");
+    return;
+  }
+
+  const { date, startTime, endTime } = formData;
+
+  const eventDateTime = new Date(`${date}T${startTime}`);
+  const now = new Date();
+
+  if (isNaN(eventDateTime.getTime())) {
+    alert("Invalid date or time.");
+    return;
+  }
+
+  if (eventDateTime <= now) {
+    alert("Please select a future time for the event.");
+    return;
+  }
+
+  if (startTime && endTime && startTime >= endTime) {
+    alert("End time must be after start time.");
+    return;
+  }
+
+  const formattedStart = formatTime(startTime);
+  const formattedEnd = formatTime(endTime);
+
+  try {
+    await addDoc(collection(db, "events"), {
+      ...formData,
+      startTime: formattedStart,
+      endTime: formattedEnd,
+      limit: parseInt(formData.limit),
+      rsvps: [],
+      creator: user.uid,
+      createdAt: new Date(),
+      foodGone: false,
+      reminder15Sent: false,
+    });
+
+    navigate("/events");
+  } catch (error) {
+    console.error("Error saving event:", error);
+    alert("Something went wrong. Try again.");
+  }
+};
+
     }
 
-    // Format time for display
-    const rawTime = formData.startTime;
-    let formattedTime = "";
-    if (rawTime) {
-      const [hourStr, min] = rawTime.split(":");
-      let hr = parseInt(hourStr, 10);
-      const ampm = hr >= 12 ? "PM" : "AM";
-      hr = hr % 12 || 12;
-      formattedTime = `${hr}:${min} ${ampm}`;
-    }
+    const formattedStart = formatTime(start);
+    const formattedEnd = formatTime(end);
 
     try {
       await addDoc(collection(db, "events"), {
         ...formData,
-        startTime: formattedTime,
+        startTime: formattedStart,
+        endTime: formattedEnd,
         limit: parseInt(formData.limit),
         rsvps: [],
         creator: user.uid,
@@ -117,6 +163,14 @@ function CreateEventForm() {
           value={formData.startTime}
           onChange={handleChange}
           required
+        />
+
+        <label><strong>End Time:</strong></label>
+        <input 
+          type="time" 
+          name="endTime" 
+          value={formData.endTime}
+          onChange={handleChange}
         />
 
         <label><strong>Food Type:</strong></label>

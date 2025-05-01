@@ -73,26 +73,21 @@ function ManageEvents() {
     if (!window.confirm("Are you sure you want to close and delete this event? This will notify all RSVPed users and remove the event.")) {
       return;
     }
-  
+
     try {
-      // Call the closeEvent cloud function
       const closeEventFunc = httpsCallable(functions, "closeEvent");
       await closeEventFunc({ eventId: event.id });
-  
-      // Delete the event from Firestore
+
       await deleteDoc(doc(db, "events", event.id));
-  
-      // Update the local state to remove the event from the list
+
       setMyEvents((prev) => prev.filter((e) => e.id !== event.id));
-  
+
       alert("Event closed, notifications sent, and event deleted.");
-  
     } catch (error) {
       console.error("Error closing or deleting event:", error);
       alert("There was an error. Please try again.");
     }
   };
-  
 
   return (
     <div className="create-event-container">

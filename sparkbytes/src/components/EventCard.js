@@ -5,10 +5,9 @@
  * - Title
  * - Description
  * - Location
- * - Date (formatted)
+ * - Date and time range
  * 
- * These cards will populate the event list page.
- * 
+ * These cards populate the event list page.
  */
 
 import "./EventCard.css";
@@ -18,7 +17,8 @@ function EventCard({
   description,
   location,
   date,
-  startTime, // added startTime
+  startTime,
+  endTime,
   tags = [],
   rsvps,
   limit,
@@ -31,18 +31,22 @@ function EventCard({
       <h3>{title}</h3>
       <p>{description}</p>
       <p>
-  <strong>Location:</strong>{" "}
-  <a
-    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="location-link"
-  >
-    {location}
-  </a>
-</p>
+        <strong>Location:</strong>{" "}
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="location-link"
+        >
+          {location}
+        </a>
+      </p>
       <p><strong>Date:</strong> {date}</p>
-      <p><strong>Time:</strong> {startTime}</p> {/* New Line for Time */}
+      
+      <p>
+        <strong>Time:</strong>{" "}
+        {endTime ? `${startTime} – ${endTime}` : startTime}
+      </p>
 
       {/* Tags */}
       <div className="event-tags">

@@ -97,7 +97,8 @@ function EventList() {
             description={event.description}
             location={event.location}
             date={event.date}
-            startTime={event.startTime} 
+            startTime={event.startTime}
+            endTime={event.endTime} // ✅ Pass endTime here
             tags={event.tags}
             rsvps={event.rsvps}
             limit={event.limit}

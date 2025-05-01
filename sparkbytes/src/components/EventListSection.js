@@ -12,7 +12,10 @@ function EventListSection({ title, events, currentUser, onRSVP, onDelete, showDe
             description={event.description}
             location={event.location}
             date={event.date}
+            startTime={event.startTime}
+            endTime={event.endTime}
             foodType={event.foodType}
+            tags={event.tags}
             rsvps={event.rsvps}
             limit={event.limit}
             isUserRSVPed={event.rsvps.includes(currentUser)}
