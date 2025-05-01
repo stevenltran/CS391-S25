@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { setDoc, doc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 import "./login.css";
 
 function Register() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -16,24 +17,39 @@ function Register() {
     e.preventDefault();
     setError("");
 
-    const { email, password } = formData;
+    const { name, email, password } = formData;
 
-    if (!email || !password) {
-      setError("Please enter both email and password");
+    if (!name || !email || !password) {
+      setError("Please fill in all fields");
       return;
     }
 
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+      // Create Firebase Auth user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-        console.log("Registered user:", user);
+      // Update Firebase Auth displayName
+      await updateProfile(user, {
+        displayName: name,
+      });
 
-        alert("Account created successfully!");
-        navigate("/profile", { state: { editing: true } });
+      // Save user profile data in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        name: name,
+        email: user.email,
+        role: "Student", // default
+        claimedEvents: 0,
+        createdEvents: 0,
+        profilePicture: `https://api.dicebear.com/7.x/thumbs/svg?seed=${user.uid}`, // default pic
+      });
+
+      alert("Account created successfully!");
+      navigate("/profile", { state: { editing: true } });
+
     } catch (err) {
-        console.error("Registration error:", err.message);
-        setError(err.message);
+      console.error("Registration error:", err.message);
+      setError(err.message);
     }
   };
 
@@ -43,6 +59,13 @@ function Register() {
         <h2>Register</h2>
         {error && <p className="error-message">{error}</p>}
         <form onSubmit={handleRegister} className="login-form">
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            onChange={handleChange}
+            required
+          />
           <input
             type="email"
             name="email"

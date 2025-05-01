@@ -30,7 +30,17 @@ function EventCard({
     <div className="event-card-wrapper">
       <h3>{title}</h3>
       <p>{description}</p>
-      <p><strong>Location:</strong> {location}</p>
+      <p>
+  <strong>Location:</strong>{" "}
+  <a
+    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="location-link"
+  >
+    {location}
+  </a>
+</p>
       <p><strong>Date:</strong> {date}</p>
       <p><strong>Time:</strong> {startTime}</p> {/* New Line for Time */}
 
