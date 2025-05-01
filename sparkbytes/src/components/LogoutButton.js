@@ -33,9 +33,9 @@ function LogoutButton({ className = "navbar-button" }) {
   if (!currentUser) return null;
 
   return (
-    <button onClick={handleLogout} className={className}>
-      Logout
-    </button>
+    <button onClick={handleLogout} className="logout-button">
+    Logout
+  </button>
   );
 }
 

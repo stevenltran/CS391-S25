@@ -66,10 +66,12 @@ function EventList() {
     }
   };
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = events
+  .filter((event) => {
     if (selectedTags.length === 0) return true;
     return selectedTags.every((tag) => event.tags?.includes(tag));
-  });
+  })
+  .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
     <div className="event-page">
