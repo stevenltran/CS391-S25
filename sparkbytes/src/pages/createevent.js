@@ -95,6 +95,24 @@ function CreateEventForm() {
 
     if (start && end && start >= end) {
       alert("End time must be after start time.");
+=======
+    const { date, startTime, endTime } = formData;
+    const eventDateTime = new Date(`${date}T${startTime}`);
+    const now = new Date();
+
+    if (isNaN(eventDateTime.getTime())) {
+      alert("Invalid date or time.");
+>>>>>>> a4c12e8 (.)
+      return;
+    }
+
+    if (eventDateTime <= now) {
+      alert("Please select a future time for the event.");
+      return;
+    }
+
+    if (startTime && endTime && startTime >= endTime) {
+      alert("End time must be after start time.");
       return;
     }
 
