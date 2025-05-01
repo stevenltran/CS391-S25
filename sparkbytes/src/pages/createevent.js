@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./createevent.css";
-
-// firebase
-import { db } from "../firebase"; 
+import { db } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
@@ -35,14 +33,28 @@ function CreateEventForm() {
       return;
     }
 
-    const rawTime = formData.startTime; 
+    // Check that the event time is in the future
+    const eventDateTime = new Date(`${formData.date}T${formData.startTime}`);
+
+    if (isNaN(eventDateTime.getTime())) {
+      alert("Invalid date or time.");
+      return;
+    }
+    
+    if (eventDateTime <= new Date()) {
+      alert("Please select a future time for the event.");
+      return;
+    }
+
+    // Format time for display
+    const rawTime = formData.startTime;
     let formattedTime = "";
     if (rawTime) {
-      const [hourStr, minute] = rawTime.split(":");
-      let hour = parseInt(hourStr, 10);
-      const ampm = hour >= 12 ? "PM" : "AM";
-      hour = hour % 12 || 12;
-      formattedTime = `${hour}:${minute} ${ampm}`;
+      const [hourStr, min] = rawTime.split(":");
+      let hr = parseInt(hourStr, 10);
+      const ampm = hr >= 12 ? "PM" : "AM";
+      hr = hr % 12 || 12;
+      formattedTime = `${hr}:${min} ${ampm}`;
     }
 
     try {
@@ -68,42 +80,43 @@ function CreateEventForm() {
     <div className="create-event-container">
       <h2>Create New Event</h2>
       <form onSubmit={handleSubmit} className="create-event-form">
-        <input 
-          type="text" 
-          name="title" 
-          placeholder="Event Title" 
-          onChange={handleChange} 
-          required 
+        <input
+          type="text"
+          name="title"
+          placeholder="Event Title"
+          onChange={handleChange}
+          required
         />
-        <textarea 
-          name="description" 
-          placeholder="Event Description" 
-          onChange={handleChange} 
-          required 
+        <textarea
+          name="description"
+          placeholder="Event Description"
+          onChange={handleChange}
+          required
         />
-        <input 
-          type="text" 
-          name="location" 
-          placeholder="Location" 
-          onChange={handleChange} 
-          required 
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          onChange={handleChange}
+          required
         />
 
         <label><strong>Date:</strong></label>
-        <input 
-          type="date" 
-          name="date" 
-          onChange={handleChange} 
-          required 
+        <input
+          type="date"
+          name="date"
+          onChange={handleChange}
+          required
+          min={new Date().toISOString().split("T")[0]}
         />
 
         <label><strong>Start Time:</strong></label>
-        <input 
-          type="time" 
-          name="startTime" 
+        <input
+          type="time"
+          name="startTime"
           value={formData.startTime}
           onChange={handleChange}
-          required 
+          required
         />
 
         <label><strong>Food Type:</strong></label>

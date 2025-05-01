@@ -34,22 +34,23 @@
   }
 
   .logout-button {
-    all: unset;
-    cursor: pointer;
-    display: inline-block;
-  }
-  
-  .logout-button.navbar-button {
-    text-decoration: none;
-    color: #eff1f7;
     background-color: #969c97;
+    color: #eff1f7;
     padding: 8px 16px;
+    border: none;
     border-radius: 5px;
     font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    text-decoration: none;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   
-  .logout-button.navbar-button:hover {
+  .logout-button:hover {
     background-color: #fbfffb;
     color: #178848;
+  }
+  
+  .logout-button:focus {
+    outline: none;
   }
