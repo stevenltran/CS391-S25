@@ -9,7 +9,12 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        <Link to="/" className="navbar-logo">SparkBytes!</Link>
+        <Link
+          to={currentUser ? "/events" : "/"}
+          className="navbar-logo"
+        >
+          SparkBytes!
+        </Link>
       </div>
 
       <div className="navbar-links">
