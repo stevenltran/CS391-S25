@@ -15,6 +15,7 @@ function CreateEventForm() {
     location: "",
     date: "",
     startTime: "",
+    endTime: "",
     tags: [],
     limit: "",
     foodGone: false,
@@ -22,6 +23,15 @@ function CreateEventForm() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const formatTime = (rawTime) => {
+    if (!rawTime) return "";
+    const [hourStr, minute] = rawTime.split(":");
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
   };
 
   const handleSubmit = async (e) => {
@@ -35,20 +45,22 @@ function CreateEventForm() {
       return;
     }
 
-    const rawTime = formData.startTime; 
-    let formattedTime = "";
-    if (rawTime) {
-      const [hourStr, minute] = rawTime.split(":");
-      let hour = parseInt(hourStr, 10);
-      const ampm = hour >= 12 ? "PM" : "AM";
-      hour = hour % 12 || 12;
-      formattedTime = `${hour}:${minute} ${ampm}`;
+    const start = formData.startTime;
+    const end = formData.endTime;
+
+    if (start && end && start >= end) {
+      alert("End time must be after start time.");
+      return;
     }
+
+    const formattedStart = formatTime(start);
+    const formattedEnd = formatTime(end);
 
     try {
       await addDoc(collection(db, "events"), {
         ...formData,
-        startTime: formattedTime,
+        startTime: formattedStart,
+        endTime: formattedEnd,
         limit: parseInt(formData.limit),
         rsvps: [],
         creator: user.uid,
@@ -104,6 +116,14 @@ function CreateEventForm() {
           value={formData.startTime}
           onChange={handleChange}
           required 
+        />
+
+        <label><strong>End Time:</strong></label>
+        <input 
+          type="time" 
+          name="endTime" 
+          value={formData.endTime}
+          onChange={handleChange}
         />
 
         <label><strong>Food Type:</strong></label>

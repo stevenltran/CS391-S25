@@ -58,7 +58,6 @@ function Login() {
         console.warn("FCM token error:", fcmError.message || fcmError);
       }
 
-      alert("Login successful!");
       navigate("/events");
 
     } catch (err) {
