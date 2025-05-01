@@ -30,27 +30,37 @@ function Login() {
       return;
     }
 
+    // only allow BU email addresses, backend rule also implemented
+    if (!email.endsWith("@bu.edu")) {
+      setError("Only BU email addresses are allowed.");
+      return;
+    }
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // completely new FCM token
-      const fcmToken = await getToken(messaging, {
-        vapidKey: "BLY2BMeZnaaM3Y5riTslRfRdpZkvDFBVcAfsMUZl_Z_PJo982YmvVo7ev3rH3TKkY6FKjLugMnT9GtDNaNNTT_0",
-      });
-
-      if (fcmToken) {
-        // update db
-        await updateDoc(doc(db, "users", user.uid), {
-          fcmToken: fcmToken,
+      // try to get FCM token and save it
+      try {
+        const fcmToken = await getToken(messaging, {
+          vapidKey: "BLY2BMeZnaaM3Y5riTslRfRdpZkvDFBVcAfsMUZl_Z_PJo982YmvVo7ev3rH3TKkY6FKjLugMnT9GtDNaNNTT_0",
         });
-        console.log("Saved FCM token:", fcmToken);
-      } else {
-        console.warn("No FCM token retrieved.");
+
+        if (fcmToken) {
+          await updateDoc(doc(db, "users", user.uid), {
+            fcmToken: fcmToken,
+          });
+          console.log("Saved FCM token:", fcmToken);
+        } else {
+          console.warn("No FCM token retrieved.");
+        }
+      } catch (fcmError) {
+        console.warn("FCM token error:", fcmError.message || fcmError);
       }
 
       alert("Login successful!");
       navigate("/events");
+
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid email or password");
