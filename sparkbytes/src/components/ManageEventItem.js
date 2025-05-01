@@ -6,25 +6,24 @@ function ManageEventItem({ event, onEdit, onDelete, rsvpUsers, onClose }) {
       <div className="event-info">
         <h3>{event.title}</h3>
 
-        {/* Date and Time Range */}
+        {/* Date and Time combined */}
         <p>
           <strong>Date & Time:</strong>{" "}
-          {event.date}{" "}
-          {event.startTime}
+          {event.date} {event.startTime}
           {event.endTime ? ` – ${event.endTime}` : ""}
         </p>
 
         <p><strong>Location:</strong> {event.location}</p>
         <p><strong>RSVP Limit:</strong> {event.limit}</p>
 
-        {/* Food Type */}
+        {/* Food Type (comma-separated list) */}
         {event.tags && event.tags.length > 0 && (
           <p>
             <strong>Food Type:</strong> {event.tags.join(", ")}
           </p>
         )}
 
-        {/* RSVP List */}
+        {/* RSVP user list */}
         {rsvpUsers.length > 0 && (
           <div className="rsvp-list">
             <strong>RSVPs:</strong>
