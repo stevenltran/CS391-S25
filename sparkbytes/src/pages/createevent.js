@@ -44,6 +44,7 @@ function CreateEventForm() {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     const { date, startTime, endTime } = formData;
     const eventDateTime = new Date(`${date}T${startTime}`);
     const now = new Date();
@@ -96,13 +97,14 @@ function CreateEventForm() {
     if (start && end && start >= end) {
       alert("End time must be after start time.");
 =======
+=======
+>>>>>>> f765f7f (createevent cleanup)
     const { date, startTime, endTime } = formData;
     const eventDateTime = new Date(`${date}T${startTime}`);
     const now = new Date();
 
     if (isNaN(eventDateTime.getTime())) {
       alert("Invalid date or time.");
->>>>>>> a4c12e8 (.)
       return;
     }
 
