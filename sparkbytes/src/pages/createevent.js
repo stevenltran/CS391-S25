@@ -73,6 +73,7 @@ function CreateEventForm() {
       const ampm = hr >= 12 ? "PM" : "AM";
       hr = hr % 12 || 12;
       formattedTime = `${hr}:${min} ${ampm}`;
+<<<<<<< HEAD
 >>>>>>> 3b7f30e (icon changed)
     }
 
@@ -88,6 +89,18 @@ function CreateEventForm() {
 
     const formattedStart = formatTime(startTime);
     const formattedEnd = formatTime(endTime);
+=======
+    const start = formData.startTime;
+    const end = formData.endTime;
+
+    if (start && end && start >= end) {
+      alert("End time must be after start time.");
+      return;
+    }
+
+    const formattedStart = formatTime(start);
+    const formattedEnd = formatTime(end);
+>>>>>>> c5ffa16 (Added end time + sparkbytes logo select)
 
     try {
       await addDoc(collection(db, "events"), {
@@ -161,6 +174,14 @@ function CreateEventForm() {
           onChange={handleChange}
 =======
 >>>>>>> 3b7f30e (icon changed)
+        />
+
+        <label><strong>End Time:</strong></label>
+        <input 
+          type="time" 
+          name="endTime" 
+          value={formData.endTime}
+          onChange={handleChange}
         />
 
         <label><strong>Food Type:</strong></label>
