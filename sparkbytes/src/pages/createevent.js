@@ -43,64 +43,27 @@ function CreateEventForm() {
       return;
     }
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    const { date, startTime, endTime } = formData;
+    const eventDateTime = new Date(`${date}T${startTime}`);
+    const now = new Date();
 
-  const auth = getAuth();
-  const user = auth.currentUser;
-
-  if (!user) {
-    alert("You must be logged in to create an event.");
-    return;
-  }
-
-  const { date, startTime, endTime } = formData;
-
-  const eventDateTime = new Date(`${date}T${startTime}`);
-  const now = new Date();
-
-  if (isNaN(eventDateTime.getTime())) {
-    alert("Invalid date or time.");
-    return;
-  }
-
-  if (eventDateTime <= now) {
-    alert("Please select a future time for the event.");
-    return;
-  }
-
-  if (startTime && endTime && startTime >= endTime) {
-    alert("End time must be after start time.");
-    return;
-  }
-
-  const formattedStart = formatTime(startTime);
-  const formattedEnd = formatTime(endTime);
-
-  try {
-    await addDoc(collection(db, "events"), {
-      ...formData,
-      startTime: formattedStart,
-      endTime: formattedEnd,
-      limit: parseInt(formData.limit),
-      rsvps: [],
-      creator: user.uid,
-      createdAt: new Date(),
-      foodGone: false,
-      reminder15Sent: false,
-    });
-
-    navigate("/events");
-  } catch (error) {
-    console.error("Error saving event:", error);
-    alert("Something went wrong. Try again.");
-  }
-};
-
+    if (isNaN(eventDateTime.getTime())) {
+      alert("Invalid date or time.");
+      return;
     }
 
-    const formattedStart = formatTime(start);
-    const formattedEnd = formatTime(end);
+    if (eventDateTime <= now) {
+      alert("Please select a future time for the event.");
+      return;
+    }
+
+    if (startTime && endTime && startTime >= endTime) {
+      alert("End time must be after start time.");
+      return;
+    }
+
+    const formattedStart = formatTime(startTime);
+    const formattedEnd = formatTime(endTime);
 
     try {
       await addDoc(collection(db, "events"), {
