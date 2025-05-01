@@ -43,13 +43,37 @@ function CreateEventForm() {
       return;
     }
 
+<<<<<<< HEAD
     const { date, startTime, endTime } = formData;
     const eventDateTime = new Date(`${date}T${startTime}`);
     const now = new Date();
+=======
+    // Check that the event time is in the future
+    const eventDateTime = new Date(`${formData.date}T${formData.startTime}`);
+>>>>>>> 3b7f30e (icon changed)
 
     if (isNaN(eventDateTime.getTime())) {
       alert("Invalid date or time.");
       return;
+<<<<<<< HEAD
+=======
+    }
+    
+    if (eventDateTime <= new Date()) {
+      alert("Please select a future time for the event.");
+      return;
+    }
+
+    // Format time for display
+    const rawTime = formData.startTime;
+    let formattedTime = "";
+    if (rawTime) {
+      const [hourStr, min] = rawTime.split(":");
+      let hr = parseInt(hourStr, 10);
+      const ampm = hr >= 12 ? "PM" : "AM";
+      hr = hr % 12 || 12;
+      formattedTime = `${hr}:${min} ${ampm}`;
+>>>>>>> 3b7f30e (icon changed)
     }
 
     if (eventDateTime <= now) {
@@ -126,6 +150,7 @@ function CreateEventForm() {
           value={formData.startTime}
           onChange={handleChange}
           required
+<<<<<<< HEAD
         />
 
         <label><strong>End Time:</strong></label>
@@ -134,6 +159,8 @@ function CreateEventForm() {
           name="endTime" 
           value={formData.endTime}
           onChange={handleChange}
+=======
+>>>>>>> 3b7f30e (icon changed)
         />
 
         <label><strong>Food Type:</strong></label>
