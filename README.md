@@ -9,15 +9,15 @@ The web-app will be deployed but if you want:
 
 To run for development, run the following commands:
 
-'''bash
-npm install 
+```bash
+npm install
 npm run dev
-'''
+```
 
 To run for production, run the following commands:
 
-'''bash 
-npm install 
+```bash
+npm install
 npm run build
 npm start
-'''
+```
