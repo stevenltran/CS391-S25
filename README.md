@@ -28,6 +28,33 @@ npm install
 npm run build
 npm start
 ```
+This project uses Firebase for:
+
+- Authentication
+- Firestore Database
+- Cloud File Storage
+- Cloud Functions
+- Cloud Notifications
+- Hosting
+
+To get started with Firebase:
+1. Install Firebase CLI
+```bash
+npm install -g firebase-tools
+```
+2. Login to Firebase
+```bash
+firebase login
+```
+3. Link the Firebase Project
+```bash
+firebase use --add
+```
+4. (optional) Deploy to Firebase
+```bash
+npm run build
+firebase deploy
+```
 
 Overview of the SparkBytes! Website:
 
