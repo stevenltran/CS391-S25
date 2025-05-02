@@ -39,7 +39,7 @@ Features
 - `Food Source Management`: Tracking and managing sources of available food
 - `User Authentication`: Secure login system restricted to BU community members
 - `Role-Based Access Control`: Different permissions for students, faculty, staff, and administrators
--`Food Availability Tracking`: Real-time updates on food status (available, claimed, gone)
+- `Food Availability Tracking`: Real-time updates on food status (available, claimed, gone)
 - `Location Services`: Find food opportunities based on campus location
 
 
