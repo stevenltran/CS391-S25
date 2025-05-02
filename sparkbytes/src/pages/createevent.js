@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./createevent.css";
-import { db } from "../firebase";
+
+// firebase
+import { db } from "../firebase"; 
 import { collection, addDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
@@ -16,73 +18,53 @@ function CreateEventForm() {
     endTime: "",
     tags: [],
     limit: "",
+    foodGone: false,
   });
 
-  // Compute today's date for min
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  const minDate = `${yyyy}-${mm}-${dd}`;
-
-  const handleChange = e => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async e => {
+  const formatTime = (rawTime) => {
+    if (!rawTime) return "";
+    const [hourStr, minute] = rawTime.split(":");
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const auth = getAuth();
     const user = auth.currentUser;
+
     if (!user) {
       alert("You must be logged in to create an event.");
       return;
     }
 
-    const { date, startTime, endTime, limit, tags, title, description, location } = formData;
-    const now = new Date();
-
-    // Parse into Date objects
-    const [year, month, day] = date.split('-').map(Number);
-    const [sh, sm] = startTime.split(':').map(Number);
-    const [eh, em] = endTime.split(':').map(Number);
-    const startTimestamp = new Date(year, month - 1, day, sh, sm);
-    const endTimestamp   = new Date(year, month - 1, day, eh, em);
-
-    if (isNaN(startTimestamp) || isNaN(endTimestamp)) {
-      alert("Invalid date or time format.");
-      return;
-    }
-    if (startTimestamp <= now) {
-      alert("Start time must be in the future.");
-      return;
-    }
-    if (endTimestamp <= startTimestamp) {
-      alert("End time must be after start time.");
-      return;
-    }
+    const formattedStart = formatTime(formData.startTime);
+    const formattedEnd = formatTime(formData.endTime);
 
     try {
       await addDoc(collection(db, "events"), {
-        title,
-        description,
-        location,
-        date,
-        startTime,
-        endTime,
-        startTimestamp,
-        endTimestamp,
-        tags,
-        limit: parseInt(limit, 10),
+        ...formData,
+        startTime: formattedStart,
+        endTime: formattedEnd,
+        limit: parseInt(formData.limit),
         rsvps: [],
         creator: user.uid,
         createdAt: new Date(),
         foodGone: false,
         reminder15Sent: false,
       });
+
       navigate("/events");
-    } catch (err) {
-      console.error("Error saving event:", err);
-      alert("Something went wrong. Please try again.");
+    } catch (error) {
+      console.error("Error saving event:", error);
+      alert("Something went wrong. Try again.");
     }
   };
 
@@ -90,70 +72,65 @@ function CreateEventForm() {
     <div className="create-event-container">
       <h2>Create New Event</h2>
       <form onSubmit={handleSubmit} className="create-event-form">
-        <input
-          type="text"
-          name="title"
-          placeholder="Event Title"
-          value={formData.title}
-          onChange={handleChange}
-          required
+        <input 
+          type="text" 
+          name="title" 
+          placeholder="Event Title" 
+          onChange={handleChange} 
+          required 
         />
-        <textarea
-          name="description"
-          placeholder="Event Description"
-          value={formData.description}
-          onChange={handleChange}
-          required
+        <textarea 
+          name="description" 
+          placeholder="Event Description" 
+          onChange={handleChange} 
+          required 
         />
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-          required
+        <input 
+          type="text" 
+          name="location" 
+          placeholder="Location" 
+          onChange={handleChange} 
+          required 
         />
 
-        <label>Date</label>
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-          min={minDate}
+        <label><strong>Date:</strong></label>
+        <input 
+          type="date" 
+          name="date" 
+          onChange={handleChange} 
+          required 
         />
 
-        <label>Start Time</label>
-        <input
-          type="time"
-          name="startTime"
+        <label><strong>Start Time:</strong></label>
+        <input 
+          type="time" 
+          name="startTime" 
           value={formData.startTime}
           onChange={handleChange}
-          required
+          required 
         />
 
-        <label>End Time</label>
-        <input
-          type="time"
-          name="endTime"
+        <label><strong>End Time:</strong></label>
+        <input 
+          type="time" 
+          name="endTime" 
           value={formData.endTime}
           onChange={handleChange}
-          required
         />
 
-        <label>Food Type</label>
+        <label><strong>Food Type:</strong></label>
         <div className="tag-checkboxes">
-          {['Vegan','Halal','Kosher','Vegetarian','Gluten-Free'].map(tag => (
+          {["Vegan", "Halal", "Kosher", "Vegetarian", "Gluten-Free"].map((tag) => (
             <label
               key={tag}
-              className={formData.tags.includes(tag) ? 'selected' : ''}
+              className={formData.tags.includes(tag) ? "selected" : ""}
               onClick={() => {
-                setFormData(prev => ({
+                const isSelected = formData.tags.includes(tag);
+                setFormData((prev) => ({
                   ...prev,
-                  tags: prev.tags.includes(tag)
-                    ? prev.tags.filter(t => t !== tag)
-                    : [...prev.tags, tag]
+                  tags: isSelected
+                    ? prev.tags.filter((t) => t !== tag)
+                    : [...prev.tags, tag],
                 }));
               }}
             >
@@ -166,10 +143,9 @@ function CreateEventForm() {
           type="number"
           name="limit"
           placeholder="RSVP Limit"
-          value={formData.limit}
           onChange={handleChange}
-          min={1}
           required
+          min={1}
         />
 
         <button type="submit">Create Event</button>
