@@ -1,195 +1,114 @@
 /* eslint-disable */
 
-const {onSchedule} = require("firebase-functions/v2/scheduler");
-const { onCall } = require("firebase-functions/v2/https");
-const {getFirestore} = require("firebase-admin/firestore");
-const {getMessaging} = require("firebase-admin/messaging");
-const admin = require("firebase-admin");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onCall }    = require("firebase-functions/v2/https");
+const admin        = require("firebase-admin");
 
 admin.initializeApp();
-const db = getFirestore();
-const messaging = getMessaging();
+const db        = admin.firestore();
+const messaging = admin.messaging();
 
-function getEasternNowDateString() {
-  const now = new Date();
-  now.setHours(now.getHours() - 4); // Adjust -4h for Eastern (EDT)
-  return now.toISOString().split("T")[0];
-}
-
-// This function checks for events that are starting within the next 15 minutes
-// and sends reminders via FCM and email to users who have RSVP'd.
+// every 1 minute, look for any event whose startTimestamp is 15m out and reminder15Sent===false
 exports.sendEventReminders = onSchedule("every 1 minutes", async (event) => {
-  console.log("Checking for upcoming events...");
+  const now        = admin.firestore.Timestamp.now();
+  const fifteenMin = admin.firestore.Timestamp.fromMillis(now.toMillis() + 15 * 60 * 1000);
 
-  const nowDateString = getEasternNowDateString();
-  console.log(`Today in Eastern Time: ${nowDateString}`);
-  
-  try {
-    const eventsSnapshot = await db
-        .collection("events")
-        .where("date", ">=", nowDateString)
-        .get();
+  // find all events that start between now and fifteenMin, and haven’t got a reminder yet
+  const snap = await db.collection("events")
+    .where("startTimestamp", ">=", now)
+    .where("startTimestamp", "<=", fifteenMin)
+    .where("reminder15Sent", "==", false)
+    .get();
 
-    const events = eventsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+  for (const docSnap of snap.docs) {
+    const ev = { id: docSnap.id, ...docSnap.data() };
 
-    console.log(`Found ${events.length} upcoming events`);
-
-    for (const event of events) {
-      if (!event.startTime || !event.date) {
-        console.warn(`Skipping event without startTime/date: ${event.title}`);
-        continue;
-      }
-
-      const [time, modifier] = event.startTime.split(" ");
-      let [hours, minutes] = time.split(":").map(Number);
-
-      // Convert 12-hour format to 24-hour
-      if (modifier === "PM" && hours !== 12) {
-        hours += 12;
-      }
-      if (modifier === "AM" && hours === 12) {
-        hours = 0;
-      }
-
-      // Create event date assuming EST timezone
-      const eventDate = new Date(event.date);
-      eventDate.setHours(hours);
-      eventDate.setMinutes(minutes);
-      eventDate.setSeconds(0);
-      eventDate.setMilliseconds(0);
-
-      // Convert EST -> UTC (+4 hours offset)
-      const eventStartUTC = new Date(eventDate.getTime() + 4 * 60 * 60 * 1000);
-      const timeDiff = eventStartUTC.getTime() - Date.now();
-
-      console.log(`Time till "${event.title}": ${Math.round(timeDiff / 1000)}`);
-
-      if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000 && !event.reminder15Sent) {
-        console.log(`Sending reminder for event: ${event.title}`);
-
-        const rsvps = event.rsvps || [];
-
-        for (const userId of rsvps) {
-          const userDoc = await db.collection("users").doc(userId).get();
-          const userData = userDoc.data();
-
-          if (userData?.fcmToken) {
-            await messaging.send({
-              token: userData.fcmToken,
-              notification: {
-                title: `${event.title}`,
-                body: `Starting soon at ${event.startTime}!`,
-              },
-            });
-            console.log(`Notification sent to user: ${userId}`);
-          }
-
-          // send email
-          if (userData?.email) {
-            await db.collection("mail").add({
-              to: [userData.email],
-              message: {
-                subject: `Reminder: ${event.title} is starting soon!`,
-                text: `Hi ${userData.name || "there"},\n\nYour event "${event.title}" is starting at ${event.startTime}.\n\nSee you there!\n\n- SparkBytes Team`,
-                html: `
-                  <div style="font-family: Arial, sans-serif; font-size: 16px;">
-                    <p>Hi ${userData.name || "there"},</p>
-                    <p>This is a reminder that your event <strong>${event.title}</strong> is starting soon at <strong>${event.startTime}</strong>.
-                    Please head to ${event.location || "the location"} to claim your food! </p>
-                    <p>We hope to see you there!</p>
-                    <br/>
-                    <p>- The SparkBytes Team</p>
-                  </div>
-                `,
-              },
-            });
-            console.log(`Email queued for user: ${userId}`);
-          } else {
-            console.warn(`User ${userId} has no email`);
-          }
-          
-        }
-
-        await db.collection("events").doc(event.id).update({
-          reminder15Sent: true,
+    for (const uid of ev.rsvps || []) {
+      // 1) push
+      const userRef = db.collection("users").doc(uid);
+      const user    = (await userRef.get()).data();
+      if (user?.fcmToken) {
+        await messaging.send({
+          token: user.fcmToken,
+          notification: {
+            title: `Reminder: ${ev.title} starts soon`,
+            body:   `Starting at ${ev.startTime}!`,
+          },
         });
-        console.log(`Marked event ${event.id} as reminder15Sent`);
       }
+
+      // 2) email (via mail extension)
+      if (user?.email) {
+        await db.collection("mail").add({
+          to: [ user.email ],
+          message: {
+            subject: `🔔 ${ev.title} is starting soon`,
+            text:    `Hi ${user.name||"there"},\n\nYour event "${ev.title}" begins at ${ev.startTime}.\n\n– SparkBytes`,
+          }
+        });
+      }
+
+      // 3) Firestore notification
+      await db.collection("notifications").add({
+        userId:    uid,
+        title:     `Upcoming: ${ev.title}`,
+        body:      `Your event "${ev.title}" starts in 15 minutes.`,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
-  } catch (err) {
-    console.error("Error sending reminders:", err);
+
+    // mark it done
+    await db.collection("events").doc(ev.id).update({ reminder15Sent: true });
   }
 
   return null;
 });
 
+// callable https://…/closeEvent
+exports.closeEvent = onCall(async (req) => {
+  const { eventId } = req.data;
+  if (!eventId) throw new Error("Missing eventId");
 
-// This function is triggered when an event is closed.
-// It sends push notifications and emails to all users who have RSVP'd.
-exports.closeEvent = onCall(async (request) => {
-  const { eventId } = request.data;
+  const evRef  = db.collection("events").doc(eventId);
+  const evSnap = await evRef.get();
+  if (!evSnap.exists) throw new Error("Event not found");
+  const ev = evSnap.data();
 
-  if (!eventId) {
-    throw new Error("Missing eventId");
-  }
+  for (const uid of ev.rsvps || []) {
+    const userRef = db.collection("users").doc(uid);
+    const user    = (await userRef.get()).data();
 
-  const eventRef = db.collection("events").doc(eventId);
-  const eventDoc = await eventRef.get();
-  const eventData = eventDoc.data();
-
-  if (!eventData) {
-    throw new Error("Event not found");
-  }
-
-  const rsvps = eventData.rsvps || [];
-
-  for (const userId of rsvps) {
-    const userDoc = await db.collection("users").doc(userId).get();
-    const userData = userDoc.data();
-
-    if (!userData) {
-      console.warn(`User ${userId} not found`);
-      continue;
-    }
-
-    // Send push notification if user has FCM token
-    if (userData?.fcmToken) {
+    if (user?.fcmToken) {
       await messaging.send({
-        token: userData.fcmToken,
+        token: user.fcmToken,
         notification: {
-          title: "Event Closed",
-          body: `The event "${eventData.title}" has now closed.`,
-        },
+          title: `Closed: ${ev.title}`,
+          body:  `The event "${ev.title}" has been closed.`,
+        }
       });
-      console.log(`Push notification sent to user: ${userId}`);
     }
 
-    // Send email if user has email
-    if (userData?.email) {
+    if (user?.email) {
       await db.collection("mail").add({
-        to: [userData.email],
+        to: [ user.email ],
         message: {
-          subject: `Closed: ${eventData.title}`,
-          text: `Hi ${userData.name || "there"},\n\nSorry, but the event "${eventData.title}" has now closed.\n\n- SparkBytes Team`,
-          html: `
-            <div style="font-family: Arial, sans-serif; font-size: 16px;">
-              <p>Hi ${userData.name || "there"},</p>
-              <p>The event <strong>${eventData.title}</strong> has now closed.</p>
-              <p>Thank you for being part of SparkBytes! We hope to see you again soon.</p>
-              <br/>
-              <p>- The SparkBytes Team</p>
-            </div>
-          `,
-        },
+          subject: `Event Closed: ${ev.title}`,
+          text:    `Hi ${user.name||"there"},\n\nYour event "${ev.title}" has now closed.\n\n– SparkBytes`,
+        }
       });
-      console.log(`Email queued for user: ${userId}`);
-    } else {
-      console.warn(`User ${userId} has no email`);
     }
+
+    // also write to notifications
+    await db.collection("notifications").add({
+      userId:    uid,
+      title:     `Closed: ${ev.title}`,
+      body:      `The event "${ev.title}" has now closed.`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
   }
+
+  // you might also want to set ev.closed = true, so your front-end filters it out:
+  await evRef.update({ closed: true });
 
   return { success: true };
 });
