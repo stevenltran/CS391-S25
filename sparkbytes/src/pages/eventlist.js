@@ -35,7 +35,7 @@ function EventList() {
     );
   };
 
-  const handleRSVP = async (index) => {
+  const handleRSVP = async (eventId) => {
     if (!currentUser?.uid) {
       alert("You must be logged in to RSVP!");
       return;
@@ -43,8 +43,11 @@ function EventList() {
 
     const userId = currentUser.uid;
     const updated = [...events];
+    const index = updated.findIndex((e) => e.id === eventId);
+    if (index === -1) return;
+
     const event = updated[index];
-    const eventRef = doc(db, "events", event.id);
+    const eventRef = doc(db, "events", eventId);
 
     let newRSVPs;
 
@@ -67,11 +70,11 @@ function EventList() {
   };
 
   const filteredEvents = events
-  .filter((event) => {
-    if (selectedTags.length === 0) return true;
-    return selectedTags.every((tag) => event.tags?.includes(tag));
-  })
-  .sort((a, b) => new Date(a.date) - new Date(b.date));
+    .filter((event) => {
+      if (selectedTags.length === 0) return true;
+      return selectedTags.every((tag) => event.tags?.includes(tag));
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
     <div className="event-page">
@@ -90,7 +93,7 @@ function EventList() {
       </div>
 
       <div className="event-list-container">
-        {filteredEvents.map((event, index) => (
+        {filteredEvents.map((event) => (
           <EventCard
             key={event.id}
             title={event.title}
@@ -98,13 +101,13 @@ function EventList() {
             location={event.location}
             date={event.date}
             startTime={event.startTime}
-            endTime={event.endTime} // ✅ Pass endTime here
+            endTime={event.endTime}
             tags={event.tags}
             rsvps={event.rsvps}
             limit={event.limit}
             isUserRSVPed={event.rsvps.includes(currentUser?.uid)}
             isFull={event.rsvps.length >= event.limit}
-            onRSVP={() => handleRSVP(index)}
+            onRSVP={() => handleRSVP(event.id)}
           />
         ))}
       </div>
