@@ -33,14 +33,14 @@ Overview of the SparkBytes! Website:
 
 Features
 
-Event Food Posting: Event organizers can post details about leftover food availability
-User Notifications: Real-time alerts about nearby food opportunities
-Eligibility Management: Controls which BU constituencies can access different food offerings
-Food Source Management: Tracking and managing sources of available food
-User Authentication: Secure login system restricted to BU community members
-Role-Based Access Control: Different permissions for students, faculty, staff, and administrators
-Food Availability Tracking: Real-time updates on food status (available, claimed, gone)
-Location Services: Find food opportunities based on campus location
+- `Event Food Posting`: Event organizers can post details about leftover food availability
+- `User Notifications`: Real-time alerts about nearby food opportunities
+- `Eligibility Management`: Controls which BU constituencies can access different food offerings
+- `Food Source Management`: Tracking and managing sources of available food
+- `User Authentication`: Secure login system restricted to BU community members
+- `Role-Based Access Control`: Different permissions for students, faculty, staff, and administrators
+-`Food Availability Tracking`: Real-time updates on food status (available, claimed, gone)
+- `Location Services`: Find food opportunities based on campus location
 
 
 
